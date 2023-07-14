@@ -32,6 +32,8 @@ public class RpcClientProxy implements InvocationHandler {
    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
       // 1、将调用所需信息编码成bytes[]，即有了调用编码【codec层】
+      long startTime = System.nanoTime();
+
       RpcRequestBody rpcRequestBody = RpcRequestBody.builder()
               .interfaceName(method.getDeclaringClass().getName())
               .methodName(method.getName())
@@ -43,6 +45,11 @@ public class RpcClientProxy implements InvocationHandler {
       ObjectOutputStream oos = new ObjectOutputStream(baos);
       oos.writeObject(rpcRequestBody);
       byte[] bytes = baos.toByteArray();
+
+      long endTime = System.nanoTime();
+      long executionTime = (endTime - startTime) / 1_000_000; // 计算执行时间(毫秒为单位)
+      int byteSize = bytes.length;
+      System.out.println("【序列化执行时间】" + executionTime + "ms" + "    " + "【数据大小】" + byteSize + "byte");
 
       // 2、创建RPC协议，将Header、Body的内容设置好（Body中存放调用编码）【protocol层】
       RpcRequest rpcRequest = RpcRequest.builder()

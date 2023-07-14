@@ -41,10 +41,17 @@ public class RpcServerWorker implements Runnable {
             if (rpcRequest.getHeader().equals("version=1")) {
 
                 // 3、将rpcRequest中的body部分解码出来变成RpcRequestBody【codec层】
+                long startTime = System.nanoTime();
+
                 byte[] body = rpcRequest.getBody();
                 ByteArrayInputStream bais = new ByteArrayInputStream(body);
                 ObjectInputStream ois = new ObjectInputStream(bais);
                 RpcRequestBody rpcRequestBody = (RpcRequestBody) ois.readObject();
+
+                long endTime = System.nanoTime();
+                long executionTime = (endTime - startTime) / 1_000_000; // 计算执行时间(毫秒为单位)
+                int byteSize = body.length;
+                System.out.println("【反序列化执行时间】" + executionTime + "ms" + "    " + "【数据大小】" + byteSize + "byte");
 
                 // 调用服务
                 Object service = registeredService.get(rpcRequestBody.getInterfaceName());
