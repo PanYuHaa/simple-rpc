@@ -57,7 +57,7 @@ public class RpcClientProxy implements InvocationHandler {
               .body(bytes)
               .build();
 
-      // 3、发送RpcRequest，获得RpcResponse【Transfer层】
+      // 3、发送RpcRequest，获得RpcResponse【transfer层】
       RpcClientTransfer rpcClient = new RpcClientTransfer();
       RpcResponse rpcResponse = rpcClient.sendRequest(rpcRequest);
 
