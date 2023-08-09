@@ -2,8 +2,8 @@ package rpc.peterpan.com.core.client;
 
 import rpc.peterpan.com.core.codec.RpcRequestBody;
 import rpc.peterpan.com.core.codec.RpcResponseBody;
-import rpc.peterpan.com.core.rpc_protocol.RpcRequest;
-import rpc.peterpan.com.core.rpc_protocol.RpcResponse;
+import rpc.peterpan.com.core.protocol.RpcRequest;
+import rpc.peterpan.com.core.protocol.RpcResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

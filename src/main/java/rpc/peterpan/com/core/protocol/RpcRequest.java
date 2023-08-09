@@ -1,4 +1,4 @@
-package rpc.peterpan.com.core.rpc_protocol;
+package rpc.peterpan.com.core.protocol;
 
 import lombok.Builder;
 import lombok.Data;

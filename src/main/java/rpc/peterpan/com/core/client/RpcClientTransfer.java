@@ -1,7 +1,7 @@
 package rpc.peterpan.com.core.client;
 
-import rpc.peterpan.com.core.rpc_protocol.RpcRequest;
-import rpc.peterpan.com.core.rpc_protocol.RpcResponse;
+import rpc.peterpan.com.core.protocol.RpcRequest;
+import rpc.peterpan.com.core.protocol.RpcResponse;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
