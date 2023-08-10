@@ -50,9 +50,6 @@ public class RpcServerWorker implements Runnable {
                 long startTime = System.nanoTime();
 
                 byte[] body = rpcRequest.getBody();
-//                ByteArrayInputStream bais = new ByteArrayInputStream(body);
-//                ObjectInputStream ois = new ObjectInputStream(bais);
-//                RpcRequestBody rpcRequestBody = (RpcRequestBody) ois.readObject();
                 RpcRequestBody rpcRequestBody = (RpcRequestBody)RpcDecoder.decode(body, reqHeader.getSerialization(), reqHeader.getMsgType());
 
                 long endTime = System.nanoTime();
@@ -61,11 +58,6 @@ public class RpcServerWorker implements Runnable {
                 System.out.println("【反序列化执行时间】" + executionTime + "ms" + "    " + "【数据大小】" + byteSize + "byte");
 
                 // 调用服务
-//                System.out.println(rpcRequestBody.getInterfaceName());
-//                System.out.println(rpcRequestBody.getMethodName());
-//                System.out.println(rpcRequestBody.getParamTypes()[0]);
-//                System.out.println(rpcRequestBody.getParameters()[0]);
-
                 Object service = registeredService.get(rpcRequestBody.getInterfaceName());
                 Method method = service.getClass().getMethod(rpcRequestBody.getMethodName(), rpcRequestBody.getParamTypes());
                 Object returnObject = method.invoke(service, rpcRequestBody.getParameters());
@@ -89,13 +81,6 @@ public class RpcServerWorker implements Runnable {
 
                 // 序列化
                 byte[] bytes = RpcEncoder.encode(rpcResponseBody, serializationType);
-//                RpcResponseBody rpcResponseBody = RpcResponseBody.builder()
-//                        .retObject(returnObject)
-//                        .build();
-//                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//                ObjectOutputStream oos = new ObjectOutputStream(baos);
-//                oos.writeObject(rpcResponseBody);
-//                byte[] bytes = baos.toByteArray();
 
                 // 2、将返回编码作为body，加上header，生成RpcResponse协议【protocol层】
                 RpcProtocol rpcResponse = new RpcProtocol();
