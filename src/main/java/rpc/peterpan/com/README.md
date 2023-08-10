@@ -90,11 +90,11 @@ func main() {
 	}
   
   // 2. 创建grpc服务器并注册服务（注册服务就是说，将pb接口的方法实现并register）
-	rpcServer := grpc.NewServer()
-	pb.RegisterGreeterServer(rpcServer, &server{})
+	rpcServerTransfer := grpc.NewServer()
+	pb.RegisterGreeterServer(rpcServerTransfer, &server{})
 	
   // 3. 启动grpc服务器
-	err = rpcServer.Serve(lis)
+	err = rpcServerTransfer.Serve(lis)
 	if err != nil {
 		fmt.Printf("failed to serve: %v", err)
 		return

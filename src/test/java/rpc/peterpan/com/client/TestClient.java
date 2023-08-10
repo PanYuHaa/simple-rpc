@@ -4,12 +4,14 @@ import rpc.peterpan.com.IDL.Hello.HelloRequest;
 import rpc.peterpan.com.IDL.Hello.HelloResponse;
 import rpc.peterpan.com.IDL.Hello.HelloService;
 import rpc.peterpan.com.core.client.RpcClientProxy;
+import rpc.peterpan.com.core.util.RpcServiceUtil;
 
 public class TestClient {
     public static void main(String[] args) {
         // 获取RpcService
-        RpcClientProxy proxy = new RpcClientProxy();
-        HelloService helloService = proxy.getService(HelloService.class);
+//        RpcClientProxy proxy = new RpcClientProxy();
+//        HelloService helloService = proxy.getService(HelloService.class);
+        HelloService helloService = RpcServiceUtil.getService(HelloService.class);
         // 构造出请求对象HelloRequest
         HelloRequest helloRequest = new HelloRequest("peter");
         // rpc调用并返回结果对象HelloResponse(因为他是代理类，所以调用的同时他会激活invoke中的逻辑)
