@@ -1,10 +1,14 @@
 package rpc.peterpan.com.core.client;
 
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import rpc.peterpan.com.core.codec.RpcDecoder;
 import rpc.peterpan.com.core.codec.RpcEncoder;
 import rpc.peterpan.com.core.codec.serialization.SerializationTypeEnum;
 import rpc.peterpan.com.core.common.MsgType;
 import rpc.peterpan.com.core.common.ProtocolConstants;
+import rpc.peterpan.com.core.config.RpcConfig;
 import rpc.peterpan.com.core.protocol.RpcProtocol;
 import rpc.peterpan.com.core.protocol.body.RpcRequestBody;
 import rpc.peterpan.com.core.protocol.body.RpcResponseBody;
@@ -24,9 +28,15 @@ import static rpc.peterpan.com.core.common.ProtocolConstants.VERSION;
 /**
  * @author PeterPan
  * @date 2023/7/11
- * @description
+ * @description 客户端的代理类
  */
 public class RpcClientProxy implements InvocationHandler {
+
+   private RpcConfig rpcConfig; // 这里保存 RpcConfig 实例
+
+   public RpcClientProxy(RpcConfig rpcConfig) {
+      this.rpcConfig = rpcConfig;
+   }
 
 //   private String serviceVersion;
 //   private long timeout;
@@ -50,7 +60,8 @@ public class RpcClientProxy implements InvocationHandler {
       // 1、将调用所需信息编码成bytes[]，即有了调用编码【codec层】
       long startTime = System.nanoTime();
 
-      byte serializationType = (byte) SerializationTypeEnum.JSON.getType();
+//      byte serializationType = (byte) SerializationTypeEnum.JSON.getType();
+      byte serializationType = rpcConfig.getSerializationByte();
       byte msgType = (byte) MsgType.REQUEST.ordinal();
 
       // 构建消息头

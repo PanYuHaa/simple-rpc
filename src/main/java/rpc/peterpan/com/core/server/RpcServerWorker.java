@@ -61,10 +61,10 @@ public class RpcServerWorker implements Runnable {
                 System.out.println("【反序列化执行时间】" + executionTime + "ms" + "    " + "【数据大小】" + byteSize + "byte");
 
                 // 调用服务
-                System.out.println(rpcRequestBody.getInterfaceName());
-                System.out.println(rpcRequestBody.getMethodName());
-                System.out.println(rpcRequestBody.getParamTypes()[0]);
-                System.out.println(rpcRequestBody.getParameters()[0]);
+//                System.out.println(rpcRequestBody.getInterfaceName());
+//                System.out.println(rpcRequestBody.getMethodName());
+//                System.out.println(rpcRequestBody.getParamTypes()[0]);
+//                System.out.println(rpcRequestBody.getParameters()[0]);
 
                 Object service = registeredService.get(rpcRequestBody.getInterfaceName());
                 Method method = service.getClass().getMethod(rpcRequestBody.getMethodName(), rpcRequestBody.getParamTypes());
