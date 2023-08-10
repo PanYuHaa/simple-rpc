@@ -1,6 +1,7 @@
 package rpc.peterpan.com.core.codec.serialization;
 
 import rpc.peterpan.com.core.codec.serialization.impl.HessianSerialization;
+import rpc.peterpan.com.core.codec.serialization.impl.JavaSerialization;
 import rpc.peterpan.com.core.codec.serialization.impl.JsonSerialization;
 
 /**
@@ -19,6 +20,8 @@ public class SerializationFactory {
                 return new HessianSerialization();
             case JSON:
                 return new JsonSerialization();
+            case JAVA:
+                return new JavaSerialization();
             default:
                 throw new IllegalArgumentException("serialization type is illegal, " + serializationType);
         }

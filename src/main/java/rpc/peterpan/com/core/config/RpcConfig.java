@@ -41,11 +41,14 @@ public class RpcConfig {
 
     public byte getSerializationByte() {
         String serializationType = properties.getProperty("serializationType");
+        System.out.println("采用的[" + serializationType + "]序列化方式");
         // 根据读取的字符串值，映射为对应的byte值，暂时支持两种，默认HESSIAN
         if ("JSON".equalsIgnoreCase(serializationType)) {
             return (byte) SerializationTypeEnum.JSON.getType();
+        } else if ("HESSIAN".equalsIgnoreCase(serializationType)) {
+            return (byte) SerializationTypeEnum.HESSIAN.getType();
         }
-        return (byte) SerializationTypeEnum.HESSIAN.getType(); // 默认值
+        return (byte) SerializationTypeEnum.JAVA.getType(); // 默认值
     }
 
     public static void main(String[] args) {

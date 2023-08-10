@@ -10,7 +10,9 @@ import lombok.Getter;
 public enum SerializationTypeEnum {
    HESSIAN(0x10), // 枚举类型 HESSIAN，对应的 type 值为 0x10
 
-   JSON(0x20); // 枚举类型 JSON，对应的 type 值为 0x20
+   JSON(0x20), // 枚举类型 JSON，对应的 type 值为 0x20
+
+   JAVA(0x30); // 枚举类型 JAVADEFAULT，对应的 type 值为 0x30
 
    @Getter
    private final int type; // 枚举类型的 type 属性，用于存储对应的值
