@@ -34,13 +34,6 @@ public class RpcClientProxy implements InvocationHandler {
       this.rpcConfig = rpcConfig;
    }
 
-//   private String serviceVersion;
-//   private long timeout;
-//   private LoadBalancerType loadBalancerType;
-//   private IRegistryService IRegistryService;
-//   private FaultTolerantType faultTolerantType;
-//   private long retryCount;
-
    @SuppressWarnings("unchecked")
    public <T> T getService(Class<T> clazz) {
       return (T) Proxy.newProxyInstance(
@@ -78,10 +71,6 @@ public class RpcClientProxy implements InvocationHandler {
 
       // 序列化
       byte[] bytes = RpcEncoder.encode(rpcRequestBody, serializationType);
-//      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//      ObjectOutputStream oos = new ObjectOutputStream(baos);
-//      oos.writeObject(rpcRequestBody);
-//      byte[] bytes = baos.toByteArray();
 
       long endTime = System.nanoTime();
       long executionTime = (endTime - startTime) / 1_000_000; // 计算执行时间(毫秒为单位)
@@ -92,10 +81,6 @@ public class RpcClientProxy implements InvocationHandler {
       RpcProtocol rpcRequest = new RpcProtocol();
       rpcRequest.setHeader(reqHeader);
       rpcRequest.setBody(bytes);
-//      RpcProtocol<RpcRequestBody> rpcRequest = RpcProtocol.builder()
-//              .header(header)
-//              .body(bytes)
-//              .build();
 
       // 3、发送RpcRequest，获得RpcResponse【transfer层】
       RpcClientTransfer rpcClient = new RpcClientTransfer();
@@ -109,11 +94,6 @@ public class RpcClientProxy implements InvocationHandler {
          RpcResponseBody rpcResponseBody = (RpcResponseBody)RpcDecoder.decode(body, respHeader.getSerialization(), respHeader.getMsgType());
          Object retObject = rpcResponseBody.getRetObject();
          return retObject;
-//         ByteArrayInputStream bais = new ByteArrayInputStream(body);
-//         ObjectInputStream ois = new ObjectInputStream(bais);
-//         RpcResponseBody rpcResponseBody = (RpcResponseBody) ois.readObject();
-//         Object retObject = rpcResponseBody.getRetObject();
-//         return retObject;
       }
       return null;
    }
