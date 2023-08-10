@@ -1,7 +1,9 @@
-package rpc.peterpan.com.core.codec;
+package rpc.peterpan.com.core.protocol.body;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -12,6 +14,8 @@ import java.io.Serializable;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 // 调用编码
 public class RpcRequestBody implements Serializable {
    private String interfaceName;

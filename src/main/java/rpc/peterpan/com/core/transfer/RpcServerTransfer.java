@@ -1,4 +1,6 @@
-package rpc.peterpan.com.core.server;
+package rpc.peterpan.com.core.transfer;
+
+import rpc.peterpan.com.core.server.RpcServerWorker;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -11,12 +13,12 @@ import java.util.concurrent.*;
  * @date 2023/7/11
  * @description
  */
-public class RpcServer {
+public class RpcServerTransfer {
     private final ExecutorService threadPool;
     // interfaceName -> interfaceImplementation object
     private final HashMap<String, Object> registeredService;
 
-    public RpcServer() {
+    public RpcServerTransfer() {
 
         int corePoolSize = 5;
         int maximumPoolSize = 50;
