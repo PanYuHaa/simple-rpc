@@ -1,4 +1,4 @@
-package rpc.peterpan.com.core.common;
+package rpc.peterpan.com.common;
 
 /**
  * @author PeterPan

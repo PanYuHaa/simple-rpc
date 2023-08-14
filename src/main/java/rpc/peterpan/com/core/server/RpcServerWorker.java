@@ -1,14 +1,16 @@
 package rpc.peterpan.com.core.server;
 
+import lombok.SneakyThrows;
+import org.springframework.cglib.reflect.FastClass;
 import rpc.peterpan.com.core.codec.RpcDecoder;
 import rpc.peterpan.com.core.codec.RpcEncoder;
-import rpc.peterpan.com.core.codec.serialization.SerializationTypeEnum;
-import rpc.peterpan.com.core.common.MsgType;
-import rpc.peterpan.com.core.common.ProtocolConstants;
+import rpc.peterpan.com.common.MsgType;
+import rpc.peterpan.com.common.ProtocolConstants;
 import rpc.peterpan.com.core.protocol.RpcProtocol;
 import rpc.peterpan.com.core.protocol.body.RpcRequestBody;
 import rpc.peterpan.com.core.protocol.body.RpcResponseBody;
 import rpc.peterpan.com.core.protocol.header.MsgHeader;
+import rpc.peterpan.com.util.redisKey.RpcServiceNameBuilder;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -16,7 +18,7 @@ import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.HashMap;
 
-import static rpc.peterpan.com.core.common.ProtocolConstants.VERSION;
+import static rpc.peterpan.com.common.ProtocolConstants.VERSION;
 
 /**
  * @author PeterPan
@@ -33,6 +35,7 @@ public class RpcServerWorker implements Runnable {
         this.registeredService = registeredService;
     }
 
+    @SneakyThrows
     @Override
     public void run() {
         try {
@@ -58,9 +61,10 @@ public class RpcServerWorker implements Runnable {
                 System.out.println("【反序列化执行时间】" + executionTime + "ms" + "    " + "【数据大小】" + byteSize + "byte");
 
                 // 调用服务
-                Object service = registeredService.get(rpcRequestBody.getInterfaceName());
-                Method method = service.getClass().getMethod(rpcRequestBody.getMethodName(), rpcRequestBody.getParamTypes());
-                Object returnObject = method.invoke(service, rpcRequestBody.getParameters());
+//                Object service = registeredService.get(rpcRequestBody.getInterfaceName());
+//                Method method = service.getClass().getMethod(rpcRequestBody.getMethodName(), rpcRequestBody.getParamTypes());
+//                Object returnObject = method.invoke(service, rpcRequestBody.getParameters());
+                Object returnObject = handle(rpcRequestBody);
 
                 // 1、将returnObject编码成bytes[]即变成了返回编码【codec层】
                 byte serializationType = reqHeader.getSerialization();
@@ -96,5 +100,29 @@ public class RpcServerWorker implements Runnable {
                  InvocationTargetException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 处理具体的 RPC 请求
+     */
+    private Object handle(RpcRequestBody request) throws Throwable {
+        String serviceKey = RpcServiceNameBuilder.buildServiceKey(request.getInterfaceName(), request.getServiceVersion());
+        // 获取服务信息
+        Object serviceBean = registeredService.get(serviceKey);
+
+        if (serviceBean == null) {
+            throw new RuntimeException(String.format("service not exist: %s:%s", request.getInterfaceName(), request.getMethodName()));
+        }
+
+        // 获取服务提供方信息并且创建
+        Class<?> serviceClass = serviceBean.getClass();
+        String methodName = request.getMethodName();
+        Class<?>[] parameterTypes = request.getParamTypes();
+        Object[] parameters = request.getParameters();
+
+        FastClass fastClass = FastClass.create(serviceClass);
+        int methodIndex = fastClass.getIndex(methodName, parameterTypes);
+        // 调用方法并返回结果
+        return fastClass.invoke(methodIndex, serviceBean, parameters);
     }
 }

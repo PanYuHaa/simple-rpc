@@ -1,25 +1,27 @@
 package rpc.peterpan.com.core.client;
 
+import rpc.peterpan.com.common.ServiceMeta;
 import rpc.peterpan.com.core.codec.RpcDecoder;
 import rpc.peterpan.com.core.codec.RpcEncoder;
-import rpc.peterpan.com.core.common.MsgType;
-import rpc.peterpan.com.core.common.ProtocolConstants;
-import rpc.peterpan.com.core.config.RpcConfig;
+import rpc.peterpan.com.common.MsgType;
+import rpc.peterpan.com.common.ProtocolConstants;
+import rpc.peterpan.com.config.RpcConfig;
 import rpc.peterpan.com.core.protocol.RpcProtocol;
 import rpc.peterpan.com.core.protocol.body.RpcRequestBody;
 import rpc.peterpan.com.core.protocol.body.RpcResponseBody;
 import rpc.peterpan.com.core.protocol.header.MsgHeader;
 import rpc.peterpan.com.core.transfer.RpcClientTransfer;
+import rpc.peterpan.com.middleware.loadbalancer.LoadBalancerType;
+import rpc.peterpan.com.middleware.registry.IRegistryService;
+import rpc.peterpan.com.middleware.registry.RegistryFactory;
+import rpc.peterpan.com.middleware.registry.RegistryType;
+import rpc.peterpan.com.util.redisKey.RpcServiceNameBuilder;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import static rpc.peterpan.com.core.common.ProtocolConstants.VERSION;
+import static rpc.peterpan.com.common.ProtocolConstants.VERSION;
 
 /**
  * @author PeterPan
@@ -28,14 +30,20 @@ import static rpc.peterpan.com.core.common.ProtocolConstants.VERSION;
  */
 public class RpcClientProxy implements InvocationHandler {
 
-   private RpcConfig rpcConfig; // 这里保存 RpcConfig 实例
+   private RpcConfig rpcConfig; // Rpc配置中心
+   private IRegistryService registryCenter; // 注册中心
+   private String serviceVersion;
+   private LoadBalancerType loadBalancerType;
 
-   public RpcClientProxy(RpcConfig rpcConfig) {
+   public RpcClientProxy(RpcConfig rpcConfig) throws Exception {
       this.rpcConfig = rpcConfig;
+      this.registryCenter = RegistryFactory.getInstance(RegistryType.toRegistry(rpcConfig.getRegisterType()));
    }
 
    @SuppressWarnings("unchecked")
-   public <T> T getService(Class<T> clazz) {
+   public <T> T getService(Class<T> clazz, String serviceVersion, String loadBalancerType) {
+      this.serviceVersion = serviceVersion;
+      this.loadBalancerType = LoadBalancerType.toLoadBalancer(loadBalancerType);
       return (T) Proxy.newProxyInstance(
               clazz.getClassLoader(),
               new Class<?>[]{clazz},
@@ -63,6 +71,7 @@ public class RpcClientProxy implements InvocationHandler {
 
       // 构建消息体
       RpcRequestBody rpcRequestBody = RpcRequestBody.builder()
+              .serviceVersion(serviceVersion)
               .interfaceName(method.getDeclaringClass().getName())
               .methodName(method.getName())
               .paramTypes(method.getParameterTypes())
@@ -83,8 +92,17 @@ public class RpcClientProxy implements InvocationHandler {
       rpcRequest.setBody(bytes);
 
       // 3、发送RpcRequest，获得RpcResponse【transfer层】
+      // 与注册中心交互
+      String serviceKey = RpcServiceNameBuilder.buildServiceKey(rpcRequestBody.getInterfaceName(), rpcRequestBody.getServiceVersion());
+      Object[] params = rpcRequestBody.getParameters();
+      // 计算哈希
+      int invokerHashCode = params.length > 0 ? params[0].hashCode() : serviceKey.hashCode();
+      // 根据服务key以及哈希获取服务提供方节点
+      ServiceMeta curServiceMeta = registryCenter.
+              discovery(serviceKey, invokerHashCode, loadBalancerType);
+
       RpcClientTransfer rpcClient = new RpcClientTransfer();
-      RpcProtocol rpcResponse = rpcClient.sendRequest(rpcRequest);
+      RpcProtocol rpcResponse = rpcClient.sendRequest(rpcRequest, curServiceMeta);
 
       // 4、解析RpcResponse，也就是在解析rpc协议【protocol层】
       MsgHeader respHeader = rpcResponse.getHeader(); // 来自于响应的header
