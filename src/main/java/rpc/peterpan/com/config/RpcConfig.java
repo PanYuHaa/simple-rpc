@@ -1,4 +1,4 @@
-package rpc.peterpan.com.core.config;
+package rpc.peterpan.com.config;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +8,7 @@ import rpc.peterpan.com.core.codec.serialization.SerializationTypeEnum;
 /**
  * @author PeterPan
  * @date 2023/8/10
- * @description 配置中心，采用懒汉式的单例，减少内存使用
+ * @description 配置中心(本地)，采用懒汉式的单例，减少内存使用
  */
 
 public class RpcConfig {
@@ -39,6 +39,9 @@ public class RpcConfig {
         }
     }
 
+    /**
+     * 序列化方式
+     */
     public byte getSerializationByte() {
         String serializationType = properties.getProperty("serializationType");
         System.out.println("采用的[" + serializationType + "]序列化方式");
@@ -49,6 +52,31 @@ public class RpcConfig {
             return (byte) SerializationTypeEnum.HESSIAN.getType();
         }
         return (byte) SerializationTypeEnum.JAVA.getType(); // 默认值
+    }
+
+    /**
+     * 注册中心
+     */
+    public String getRegisterAddr() {
+        // 注册中心地址
+        return properties.getProperty("registerAddr");
+    }
+
+    public String getRegisterType() {
+        // 注册中心类型
+        return properties.getProperty("registerType");
+    }
+
+    public String getRegisterPsw() {
+        // 注册中心密码
+        return properties.getProperty("registerPsw");
+    }
+
+    /**
+     * 获取 port
+     */
+    public String getPort() {
+        return properties.getProperty("port");
     }
 
     public static void main(String[] args) {

@@ -2,7 +2,7 @@ package rpc.peterpan.com.core.codec;
 
 import rpc.peterpan.com.core.codec.serialization.IRpcSerialization;
 import rpc.peterpan.com.core.codec.serialization.SerializationFactory;
-import rpc.peterpan.com.core.common.MsgType;
+import rpc.peterpan.com.common.MsgType;
 import rpc.peterpan.com.core.protocol.body.RpcRequestBody;
 import rpc.peterpan.com.core.protocol.body.RpcResponseBody;
 

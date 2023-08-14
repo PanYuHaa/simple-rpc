@@ -18,6 +18,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 // 调用编码
 public class RpcRequestBody implements Serializable {
+   private String serviceVersion;
    private String interfaceName;
    private String methodName;
    private Object[] parameters;

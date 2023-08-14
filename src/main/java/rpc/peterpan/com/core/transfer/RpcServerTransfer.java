@@ -1,10 +1,18 @@
 package rpc.peterpan.com.core.transfer;
 
+import rpc.peterpan.com.common.ServiceMeta;
+import rpc.peterpan.com.config.RpcConfig;
 import rpc.peterpan.com.core.server.RpcServerWorker;
+import rpc.peterpan.com.middleware.registry.IRegistryService;
+import rpc.peterpan.com.middleware.registry.RegistryFactory;
+import rpc.peterpan.com.middleware.registry.RegistryType;
+import rpc.peterpan.com.util.redisKey.RpcServiceNameBuilder;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.concurrent.*;
 
@@ -14,12 +22,26 @@ import java.util.concurrent.*;
  * @description
  */
 public class RpcServerTransfer {
+
+    private static String serverAddress; // 服务器地址
+
     private final ExecutorService threadPool;
     // interfaceName -> interfaceImplementation object
     private final HashMap<String, Object> registeredService;
+    // 注册中心
+    private IRegistryService registryCenter;
+    // rpc配置中心
+    private RpcConfig rpcConfig;
 
-    public RpcServerTransfer() {
+    static {
+        try {
+            serverAddress = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public RpcServerTransfer() throws Exception {
         int corePoolSize = 5;
         int maximumPoolSize = 50;
         long keepAliveTime = 60;
@@ -27,15 +49,26 @@ public class RpcServerTransfer {
         ThreadFactory threadFactory = Executors.defaultThreadFactory();
         this.threadPool = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.SECONDS, workingQueue, threadFactory);
         this.registeredService = new HashMap<String, Object>();
+        this.rpcConfig = RpcConfig.getInstance();
+        this.registryCenter = RegistryFactory.getInstance(RegistryType.toRegistry(rpcConfig.getRegisterType()));
     }
 
     // 参数service就是interface的implementation object
-    public void register(Object service) {
-        registeredService.put(service.getClass().getInterfaces()[0].getName(), service);
+    public void register(Object service, String serviceVersion) throws Exception {
+        String interfaceName = service.getClass().getInterfaces()[0].getName();
+        ServiceMeta serviceMeta = new ServiceMeta(); // 创建服务元数据对象
+        serviceMeta.setServiceAddr(serverAddress); // 设置服务地址
+        serviceMeta.setServicePort(Integer.parseInt(rpcConfig.getPort())); // 设置服务端口号
+        serviceMeta.setServiceVersion(serviceVersion); // 设置服务版本
+        serviceMeta.setServiceName(interfaceName); // 设置服务名称
+        // 注册服务到注册中心（使用通用接口register，未来redis或者zk来实现具体内容）
+        registryCenter.register(serviceMeta);
+        // 缓存服务实例
+        registeredService.put(RpcServiceNameBuilder.buildServiceKey(interfaceName, serviceVersion), service);
     }
 
-    public void serve(int port) {
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
+    public void serve() {
+        try (ServerSocket serverSocket = new ServerSocket(Integer.parseInt(rpcConfig.getPort()))) {
             System.out.println("server starting...");
             Socket handleSocket;
             while ((handleSocket = serverSocket.accept()) != null) {
