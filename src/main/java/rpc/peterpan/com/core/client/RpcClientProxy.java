@@ -1,5 +1,6 @@
 package rpc.peterpan.com.core.client;
 
+import lombok.extern.slf4j.Slf4j;
 import rpc.peterpan.com.common.ServiceMeta;
 import rpc.peterpan.com.core.codec.RpcDecoder;
 import rpc.peterpan.com.core.codec.RpcEncoder;
@@ -28,6 +29,7 @@ import static rpc.peterpan.com.common.ProtocolConstants.VERSION;
  * @date 2023/7/11
  * @description 客户端的代理类
  */
+@Slf4j
 public class RpcClientProxy implements InvocationHandler {
 
    private RpcConfig rpcConfig; // Rpc配置中心
@@ -84,7 +86,7 @@ public class RpcClientProxy implements InvocationHandler {
       long endTime = System.nanoTime();
       long executionTime = (endTime - startTime) / 1_000_000; // 计算执行时间(毫秒为单位)
       int byteSize = bytes.length;
-      System.out.println("【序列化执行时间】" + executionTime + "ms" + "    " + "【数据大小】" + byteSize + "byte");
+      log.info("[{}_{}${}] - 序列化执行时间={}ms, 数据大小={}byte", method.getDeclaringClass().getName(), serviceVersion, method.getName(), executionTime, byteSize);
 
       // 2、创建RPC协议，将Header、Body的内容设置好（Body中存放调用编码）【protocol层】
       RpcProtocol rpcRequest = new RpcProtocol();

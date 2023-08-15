@@ -3,6 +3,8 @@ package rpc.peterpan.com.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
+import lombok.extern.slf4j.Slf4j;
 import rpc.peterpan.com.core.codec.serialization.SerializationTypeEnum;
 
 /**
@@ -10,7 +12,7 @@ import rpc.peterpan.com.core.codec.serialization.SerializationTypeEnum;
  * @date 2023/8/10
  * @description 配置中心(本地)，采用懒汉式的单例，减少内存使用
  */
-
+@Slf4j
 public class RpcConfig {
     private static RpcConfig instance;
     private Properties properties;
@@ -44,7 +46,7 @@ public class RpcConfig {
      */
     public byte getSerializationByte() {
         String serializationType = properties.getProperty("serializationType");
-        System.out.println("采用的[" + serializationType + "]序列化方式");
+        log.info("执行[{}]序列化方式", serializationType);
         // 根据读取的字符串值，映射为对应的byte值，暂时支持两种，默认HESSIAN
         if ("JSON".equalsIgnoreCase(serializationType)) {
             return (byte) SerializationTypeEnum.JSON.getType();

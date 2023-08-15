@@ -1,5 +1,8 @@
 package rpc.peterpan.com.core.transfer;
 
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import rpc.peterpan.com.common.ServiceMeta;
 import rpc.peterpan.com.config.RpcConfig;
 import rpc.peterpan.com.core.server.RpcServerWorker;
@@ -19,12 +22,13 @@ import java.util.concurrent.*;
 /**
  * @author PeterPan
  * @date 2023/7/11
- * @description
+ * @description rpc服务端传输层
  */
+@Slf4j
 public class RpcServerTransfer {
-
-    private static String serverAddress; // 服务器地址
-
+    // 服务器地址
+    private static String serverAddress;
+    // 线程池
     private final ExecutorService threadPool;
     // interfaceName -> interfaceImplementation object
     private final HashMap<String, Object> registeredService;
@@ -69,10 +73,10 @@ public class RpcServerTransfer {
 
     public void serve() {
         try (ServerSocket serverSocket = new ServerSocket(Integer.parseInt(rpcConfig.getPort()))) {
-            System.out.println("server starting...");
+            log.info("Server Starting... port={}",rpcConfig.getPort());
             Socket handleSocket;
             while ((handleSocket = serverSocket.accept()) != null) {
-                System.out.println("client connected, ip:" + handleSocket.getInetAddress());
+                log.info("Client Connected, ip={}", handleSocket.getInetAddress());
                 threadPool.execute(new RpcServerWorker(handleSocket, registeredService));
             }
         } catch (IOException e) {
