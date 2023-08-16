@@ -1,6 +1,7 @@
 package rpc.peterpan.com.core.server;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.reflect.FastClass;
 import rpc.peterpan.com.core.codec.RpcDecoder;
 import rpc.peterpan.com.core.codec.RpcEncoder;
@@ -23,8 +24,9 @@ import static rpc.peterpan.com.common.ProtocolConstants.VERSION;
 /**
  * @author PeterPan
  * @date 2023/7/11
- * @description
+ * @description rpc服务端线程执行
  */
+@Slf4j
 public class RpcServerWorker implements Runnable {
 
     private Socket socket;
@@ -58,7 +60,7 @@ public class RpcServerWorker implements Runnable {
                 long endTime = System.nanoTime();
                 long executionTime = (endTime - startTime) / 1_000_000; // 计算执行时间(毫秒为单位)
                 int byteSize = body.length;
-                System.out.println("【反序列化执行时间】" + executionTime + "ms" + "    " + "【数据大小】" + byteSize + "byte");
+                log.info("[{}_{}${}] - 反序列化执行时间={}ms, 数据大小={}byte", rpcRequestBody.getInterfaceName(), rpcRequestBody.getServiceVersion(), rpcRequestBody.getMethodName(), executionTime, byteSize);
 
                 // 调用服务
 //                Object service = registeredService.get(rpcRequestBody.getInterfaceName());

@@ -6,9 +6,13 @@ import rpc.peterpan.com.IDL.Hello.HelloService;
 import rpc.peterpan.com.util.RpcServiceUtil;
 
 public class TestClient {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         // 获取RpcService
-        HelloService helloService = RpcServiceUtil.getService(HelloService.class, "v1", "RoundRobin");
+        HelloService helloService = RpcServiceUtil.getService(HelloService.class,
+                "v1",
+                "RoundRobin",
+                "Failover",
+                30);
         // 构造出请求对象HelloRequest
         HelloRequest helloRequest = new HelloRequest("peter");
         // rpc调用并返回结果对象HelloResponse(因为他是代理类，所以调用的同时他会激活invoke中的逻辑)

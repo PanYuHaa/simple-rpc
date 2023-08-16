@@ -1,4 +1,4 @@
-package rpc.peterpan.com.middleware.registry;
+package rpc.peterpan.com.registry;
 
 /**
  * @author PeterPan

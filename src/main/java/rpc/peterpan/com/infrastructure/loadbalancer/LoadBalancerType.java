@@ -1,4 +1,4 @@
-package rpc.peterpan.com.middleware.loadbalancer;
+package rpc.peterpan.com.infrastructure.loadbalancer;
 
 /**
  * @author PeterPan
