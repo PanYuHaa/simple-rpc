@@ -1,4 +1,4 @@
-package rpc.peterpan.com.middleware.registry.impl;
+package rpc.peterpan.com.registry.impl;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -9,10 +9,10 @@ import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
 import rpc.peterpan.com.common.ServiceMeta;
 import rpc.peterpan.com.config.RpcConfig;
-import rpc.peterpan.com.middleware.loadbalancer.IServiceLoadBalancer;
-import rpc.peterpan.com.middleware.loadbalancer.LoadBalancerFactory;
-import rpc.peterpan.com.middleware.loadbalancer.LoadBalancerType;
-import rpc.peterpan.com.middleware.registry.IRegistryService;
+import rpc.peterpan.com.infrastructure.loadbalancer.IServiceLoadBalancer;
+import rpc.peterpan.com.infrastructure.loadbalancer.LoadBalancerFactory;
+import rpc.peterpan.com.infrastructure.loadbalancer.LoadBalancerType;
+import rpc.peterpan.com.registry.IRegistryService;
 import rpc.peterpan.com.util.redisKey.RpcServiceNameBuilder;
 
 import java.io.IOException;

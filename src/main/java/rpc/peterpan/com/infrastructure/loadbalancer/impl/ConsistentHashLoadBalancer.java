@@ -1,7 +1,7 @@
-package rpc.peterpan.com.middleware.loadbalancer.impl;
+package rpc.peterpan.com.infrastructure.loadbalancer.impl;
 
 import rpc.peterpan.com.common.ServiceMeta;
-import rpc.peterpan.com.middleware.loadbalancer.IServiceLoadBalancer;
+import rpc.peterpan.com.infrastructure.loadbalancer.IServiceLoadBalancer;
 
 import java.util.List;
 import java.util.Map;

@@ -1,8 +1,8 @@
-package rpc.peterpan.com.middleware.registry;
+package rpc.peterpan.com.registry;
 
 
-import rpc.peterpan.com.middleware.registry.impl.RedisRegistry;
-import rpc.peterpan.com.middleware.registry.impl.ZookeeperRegistry;
+import rpc.peterpan.com.registry.impl.RedisRegistry;
+import rpc.peterpan.com.registry.impl.ZookeeperRegistry;
 
 /**
  * @author PeterPan

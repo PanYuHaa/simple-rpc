@@ -1,4 +1,4 @@
-package rpc.peterpan.com.middleware.registry.impl;
+package rpc.peterpan.com.registry.impl;
 
 import com.alibaba.fastjson.JSON;
 import redis.clients.jedis.Jedis;
@@ -6,10 +6,10 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import rpc.peterpan.com.common.ServiceMeta;
 import rpc.peterpan.com.config.RpcConfig;
-import rpc.peterpan.com.middleware.loadbalancer.IServiceLoadBalancer;
-import rpc.peterpan.com.middleware.loadbalancer.LoadBalancerFactory;
-import rpc.peterpan.com.middleware.loadbalancer.LoadBalancerType;
-import rpc.peterpan.com.middleware.registry.IRegistryService;
+import rpc.peterpan.com.infrastructure.loadbalancer.IServiceLoadBalancer;
+import rpc.peterpan.com.infrastructure.loadbalancer.LoadBalancerFactory;
+import rpc.peterpan.com.infrastructure.loadbalancer.LoadBalancerType;
+import rpc.peterpan.com.registry.IRegistryService;
 import rpc.peterpan.com.util.redisKey.RpcServiceNameBuilder;
 import org.springframework.util.ObjectUtils;
 

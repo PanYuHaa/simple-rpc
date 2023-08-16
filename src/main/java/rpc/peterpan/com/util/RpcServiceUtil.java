@@ -20,7 +20,7 @@ public class RpcServiceUtil {
       }
    }
 
-   public static <T> T getService(Class<T> clazz, String serviceVersion, String loadBalancerType) {
-      return rpcClientProxy.getService(clazz, serviceVersion, loadBalancerType);
+   public static <T> T getService(Class<T> clazz, String serviceVersion, String loadBalancerType, String faultTolerantType, long timeout) throws Exception {
+      return rpcClientProxy.getService(clazz, serviceVersion, loadBalancerType, faultTolerantType, timeout);
    }
 }

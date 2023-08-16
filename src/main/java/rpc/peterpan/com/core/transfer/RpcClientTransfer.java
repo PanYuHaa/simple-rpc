@@ -2,12 +2,6 @@ package rpc.peterpan.com.core.transfer;
 
 import rpc.peterpan.com.common.ServiceMeta;
 import rpc.peterpan.com.core.protocol.RpcProtocol;
-import rpc.peterpan.com.core.protocol.body.RpcRequestBody;
-import rpc.peterpan.com.core.protocol.body.RpcResponseBody;
-import rpc.peterpan.com.middleware.registry.IRegistryService;
-import rpc.peterpan.com.middleware.registry.RegistryFactory;
-import rpc.peterpan.com.middleware.registry.RegistryType;
-import rpc.peterpan.com.util.redisKey.RpcServiceNameBuilder;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -21,23 +15,20 @@ import java.net.Socket;
  */
 // 传入protocol层的RpcRequest，输出protocol层的RpcResponse
 public class RpcClientTransfer {
-   public RpcProtocol sendRequest(RpcProtocol rpcRequest, ServiceMeta curServiceMeta) throws Exception {
+    public RpcProtocol sendRequest(RpcProtocol rpcRequest, ServiceMeta curServiceMeta) throws Exception {
+        Socket socket = new Socket(curServiceMeta.getServiceAddr(), curServiceMeta.getServicePort()); // "localhost", 9000
+//        if (true) {
+//            throw new IOException("Something went wrong"); // 测试future内部错误
+//        }
+        // 发送【transfer层】
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+        ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+        objectOutputStream.writeObject(rpcRequest);
+        objectOutputStream.flush();
 
-      try (Socket socket = new Socket(curServiceMeta.getServiceAddr(), curServiceMeta.getServicePort())) { // "localhost", 9000
-         // 发送【transfer层】
-         ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-         ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-         objectOutputStream.writeObject(rpcRequest);
-         objectOutputStream.flush();
+        RpcProtocol rpcResponse = (RpcProtocol) objectInputStream.readObject();
 
-         RpcProtocol rpcResponse = (RpcProtocol) objectInputStream.readObject();
-
-         return rpcResponse;
-
-      } catch (IOException | ClassNotFoundException e) {
-         e.printStackTrace();
-         return null;
-      }
-   }
+        return rpcResponse;
+    }
 }
 

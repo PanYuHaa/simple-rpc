@@ -1,14 +1,12 @@
 package rpc.peterpan.com.core.transfer;
 
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import rpc.peterpan.com.common.ServiceMeta;
 import rpc.peterpan.com.config.RpcConfig;
 import rpc.peterpan.com.core.server.RpcServerWorker;
-import rpc.peterpan.com.middleware.registry.IRegistryService;
-import rpc.peterpan.com.middleware.registry.RegistryFactory;
-import rpc.peterpan.com.middleware.registry.RegistryType;
+import rpc.peterpan.com.registry.IRegistryService;
+import rpc.peterpan.com.registry.RegistryFactory;
+import rpc.peterpan.com.registry.RegistryType;
 import rpc.peterpan.com.util.redisKey.RpcServiceNameBuilder;
 
 import java.io.IOException;

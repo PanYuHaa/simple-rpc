@@ -81,6 +81,11 @@ public class RpcConfig {
         return properties.getProperty("port");
     }
 
+    /**
+     * 故障转移
+     */
+    public String getRetryCount() {return properties.getProperty("retryCount");}
+
     public static void main(String[] args) {
         RpcConfig rpcConfig = new RpcConfig();
         byte serializationByte = rpcConfig.getSerializationByte();
