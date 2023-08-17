@@ -18,16 +18,20 @@ public class RpcClientTransfer {
     public RpcProtocol sendRequest(RpcProtocol rpcRequest, ServiceMeta curServiceMeta) throws Exception {
         try {
             Socket socket = new Socket(curServiceMeta.getServiceAddr(), curServiceMeta.getServicePort());
-            if (true) {
-                throw new IOException("Something went wrong"); // 测试future内部错误
-            }
+
             // 发送【transfer层】
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-            objectOutputStream.writeObject(rpcRequest); // TODO：做粘包半包处理
+//            objectOutputStream.writeObject(rpcRequest); // 在发送端发送两个连续的消息，模拟粘包
+            objectOutputStream.writeObject(rpcRequest);
             objectOutputStream.flush();
 
             RpcProtocol rpcResponse = (RpcProtocol) objectInputStream.readObject();
+
+            // 校验body长度，预防粘包或者半包问题
+            if (rpcResponse.getHeader().getMsgLen() != rpcResponse.getBody().length) {
+                throw new IOException("出现粘包或半包异常");
+            }
 
             return rpcResponse;
         } catch (IOException e) {

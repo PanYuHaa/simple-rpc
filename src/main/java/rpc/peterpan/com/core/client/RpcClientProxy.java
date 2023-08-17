@@ -28,6 +28,7 @@ import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.concurrent.*;
 
+import static rpc.peterpan.com.common.ProtocolConstants.MAGIC;
 import static rpc.peterpan.com.common.ProtocolConstants.VERSION;
 
 /**
@@ -71,17 +72,8 @@ public class RpcClientProxy implements InvocationHandler {
         // 1、将调用所需信息编码成bytes[]，即有了调用编码【codec层】
         long startTime = System.nanoTime();
 
-//      byte serializationType = (byte) SerializationTypeEnum.JSON.getType();
         byte serializationType = rpcConfig.getSerializationByte();
         byte msgType = (byte) MsgType.REQUEST.ordinal();
-
-        // 构建消息头
-        MsgHeader reqHeader = new MsgHeader();
-        reqHeader.setMagic(ProtocolConstants.MAGIC);
-        reqHeader.setVersion(VERSION);
-        reqHeader.setSerialization(serializationType); // 配置文件读取方式，暂时使用JSON
-        reqHeader.setMsgType(msgType); // 注意这里是请求REQUEST
-        reqHeader.setStatus((byte) 0x1);
 
         // 构建消息体
         RpcRequestBody rpcRequestBody = RpcRequestBody.builder()
@@ -94,6 +86,15 @@ public class RpcClientProxy implements InvocationHandler {
 
         // 序列化
         byte[] bytes = RpcEncoder.encode(rpcRequestBody, serializationType);
+
+        // 构建消息头
+        MsgHeader reqHeader = new MsgHeader();
+        reqHeader.setMagic(ProtocolConstants.MAGIC);
+        reqHeader.setMsgLen(bytes.length);
+        reqHeader.setVersion(VERSION);
+        reqHeader.setSerialization(serializationType); // 配置文件读取方
+        reqHeader.setMsgType(msgType); // 注意这里是请求REQUEST
+        reqHeader.setStatus((byte) 0x1);
 
         long endTime = System.nanoTime();
         long executionTime = (endTime - startTime) / 1_000_000; // 计算执行时间(毫秒为单位)
@@ -131,7 +132,7 @@ public class RpcClientProxy implements InvocationHandler {
                 // 4、解析RpcResponse，也就是在解析rpc协议【protocol层】
                 MsgHeader respHeader = rpcResponse.getHeader(); // 来自于响应的header
                 byte[] body = rpcResponse.getBody();
-                if (respHeader.getVersion() == VERSION) {
+                if (respHeader.getMagic() == MAGIC) {
                     // 将RpcResponse的body中的返回编码，解码成我们需要的对象Object并返回【codec层】
                     RpcResponseBody rpcResponseBody = (RpcResponseBody) RpcDecoder.decode(body, respHeader.getSerialization(), respHeader.getMsgType());
                     Object retObject = rpcResponseBody.getRetObject();

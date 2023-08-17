@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.HashMap;
 
+import static rpc.peterpan.com.common.ProtocolConstants.MAGIC;
 import static rpc.peterpan.com.common.ProtocolConstants.VERSION;
 
 /**
@@ -49,7 +50,7 @@ public class RpcServerWorker implements Runnable {
             MsgHeader reqHeader = rpcRequest.getHeader();
 
             // 2、解析版本号，并判断【protocol层】
-            if (reqHeader.getVersion() == VERSION) {
+            if (reqHeader.getMagic() == MAGIC) {
 
                 // 3、将rpcRequest中的body部分解码出来变成RpcRequestBody【codec层】
                 long startTime = System.nanoTime();
@@ -63,9 +64,6 @@ public class RpcServerWorker implements Runnable {
                 log.info("[{}_{}${}] - 反序列化执行时间={}ms, 数据大小={}byte", rpcRequestBody.getInterfaceName(), rpcRequestBody.getServiceVersion(), rpcRequestBody.getMethodName(), executionTime, byteSize);
 
                 // 调用服务
-//                Object service = registeredService.get(rpcRequestBody.getInterfaceName());
-//                Method method = service.getClass().getMethod(rpcRequestBody.getMethodName(), rpcRequestBody.getParamTypes());
-//                Object returnObject = method.invoke(service, rpcRequestBody.getParameters());
                 Object returnObject = handle(rpcRequestBody);
 
                 // 1、将returnObject编码成bytes[]即变成了返回编码【codec层】
