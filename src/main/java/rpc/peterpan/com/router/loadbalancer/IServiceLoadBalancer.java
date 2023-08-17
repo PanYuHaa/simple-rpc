@@ -1,4 +1,4 @@
-package rpc.peterpan.com.infrastructure.loadbalancer;
+package rpc.peterpan.com.router.loadbalancer;
 
 import rpc.peterpan.com.common.ServiceMeta;
 

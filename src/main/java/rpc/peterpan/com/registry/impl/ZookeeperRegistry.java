@@ -9,9 +9,9 @@ import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
 import rpc.peterpan.com.common.ServiceMeta;
 import rpc.peterpan.com.config.RpcConfig;
-import rpc.peterpan.com.infrastructure.loadbalancer.IServiceLoadBalancer;
-import rpc.peterpan.com.infrastructure.loadbalancer.LoadBalancerFactory;
-import rpc.peterpan.com.infrastructure.loadbalancer.LoadBalancerType;
+import rpc.peterpan.com.router.loadbalancer.IServiceLoadBalancer;
+import rpc.peterpan.com.router.loadbalancer.LoadBalancerFactory;
+import rpc.peterpan.com.router.loadbalancer.LoadBalancerType;
 import rpc.peterpan.com.registry.IRegistryService;
 import rpc.peterpan.com.util.redisKey.RpcServiceNameBuilder;
 
