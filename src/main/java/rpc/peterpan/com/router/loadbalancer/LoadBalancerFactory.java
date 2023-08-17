@@ -1,7 +1,7 @@
-package rpc.peterpan.com.infrastructure.loadbalancer;
+package rpc.peterpan.com.router.loadbalancer;
 
-import rpc.peterpan.com.infrastructure.loadbalancer.impl.ConsistentHashLoadBalancer;
-import rpc.peterpan.com.infrastructure.loadbalancer.impl.RoundRobinLoadBalancer;
+import rpc.peterpan.com.router.loadbalancer.impl.ConsistentHashLoadBalancer;
+import rpc.peterpan.com.router.loadbalancer.impl.RoundRobinLoadBalancer;
 
 import java.util.HashMap;
 import java.util.Map;

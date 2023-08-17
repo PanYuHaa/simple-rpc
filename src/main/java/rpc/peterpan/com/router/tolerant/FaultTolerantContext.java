@@ -1,4 +1,4 @@
-package rpc.peterpan.com.infrastructure.tolerant;
+package rpc.peterpan.com.router.tolerant;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

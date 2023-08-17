@@ -1,8 +1,8 @@
-package rpc.peterpan.com.infrastructure.tolerant.impl;
+package rpc.peterpan.com.router.tolerant.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import rpc.peterpan.com.infrastructure.tolerant.FaultTolerantContext;
-import rpc.peterpan.com.infrastructure.tolerant.IFaultTolerantHandler;
+import rpc.peterpan.com.router.tolerant.FaultTolerantContext;
+import rpc.peterpan.com.router.tolerant.IFaultTolerantHandler;
 
 /**
  * @author PeterPan

@@ -1,7 +1,7 @@
 package rpc.peterpan.com.registry;
 
 import rpc.peterpan.com.common.ServiceMeta;
-import rpc.peterpan.com.infrastructure.loadbalancer.LoadBalancerType;
+import rpc.peterpan.com.router.loadbalancer.LoadBalancerType;
 
 import java.io.IOException;
 import java.util.List;

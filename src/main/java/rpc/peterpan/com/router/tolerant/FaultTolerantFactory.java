@@ -1,8 +1,8 @@
-package rpc.peterpan.com.infrastructure.tolerant;
+package rpc.peterpan.com.router.tolerant;
 
-import rpc.peterpan.com.infrastructure.tolerant.impl.FailFastFaultTolerantHandler;
-import rpc.peterpan.com.infrastructure.tolerant.impl.FailoverFaultTolerantHandler;
-import rpc.peterpan.com.infrastructure.tolerant.impl.FailsafeFaultTolerantHandler;
+import rpc.peterpan.com.router.tolerant.impl.FailFastFaultTolerantHandler;
+import rpc.peterpan.com.router.tolerant.impl.FailoverFaultTolerantHandler;
+import rpc.peterpan.com.router.tolerant.impl.FailsafeFaultTolerantHandler;
 
 import java.util.HashMap;
 import java.util.Map;
