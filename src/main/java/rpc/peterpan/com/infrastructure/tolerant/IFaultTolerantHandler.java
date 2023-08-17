@@ -5,7 +5,7 @@ package rpc.peterpan.com.infrastructure.tolerant;
  * @date 2023/7/17
  * @description 容错策略
  */
-public interface IFaultTolerantStrategy {
-
-   void handler();
+public interface IFaultTolerantHandler {
+    FaultTolerantContext tolerant(FaultTolerantContext ctx);
 }
+

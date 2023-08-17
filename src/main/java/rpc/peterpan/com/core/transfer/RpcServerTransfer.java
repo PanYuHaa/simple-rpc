@@ -71,7 +71,7 @@ public class RpcServerTransfer {
 
     public void serve() {
         try (ServerSocket serverSocket = new ServerSocket(Integer.parseInt(rpcConfig.getPort()))) {
-            log.info("Server Starting... port={}",rpcConfig.getPort());
+            log.info("Server Starting... port={}", rpcConfig.getPort());
             Socket handleSocket;
             while ((handleSocket = serverSocket.accept()) != null) {
                 log.info("Client Connected, ip={}", handleSocket.getInetAddress());

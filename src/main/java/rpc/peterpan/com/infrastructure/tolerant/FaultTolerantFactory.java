@@ -1,5 +1,9 @@
 package rpc.peterpan.com.infrastructure.tolerant;
 
+import rpc.peterpan.com.infrastructure.tolerant.impl.FailFastFaultTolerantHandler;
+import rpc.peterpan.com.infrastructure.tolerant.impl.FailoverFaultTolerantHandler;
+import rpc.peterpan.com.infrastructure.tolerant.impl.FailsafeFaultTolerantHandler;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,12 +15,14 @@ import java.util.Map;
  */
 public class FaultTolerantFactory {
 
-   private static Map<FaultTolerantType, IFaultTolerantStrategy> faultTolerantStrategyMap = new HashMap<>();
+   private static Map<FaultTolerantType, IFaultTolerantHandler> faultTolerantStrategyMap = new HashMap<>();
    static {
-
+      faultTolerantStrategyMap.put(FaultTolerantType.FailFast, new FailFastFaultTolerantHandler());
+      faultTolerantStrategyMap.put(FaultTolerantType.Failover, new FailoverFaultTolerantHandler());
+      faultTolerantStrategyMap.put(FaultTolerantType.Failsafe, new FailsafeFaultTolerantHandler());
    }
 
-   public static IFaultTolerantStrategy get(FaultTolerantType faultTolerantType){
+   public static IFaultTolerantHandler get(FaultTolerantType faultTolerantType){
       return faultTolerantStrategyMap.get(faultTolerantType);
    }
 }
