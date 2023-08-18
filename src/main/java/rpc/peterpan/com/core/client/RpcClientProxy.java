@@ -2,11 +2,9 @@ package rpc.peterpan.com.core.client;
 
 import lombok.extern.slf4j.Slf4j;
 import rpc.peterpan.com.common.ServiceMeta;
-import rpc.peterpan.com.common.StatusConstants;
 import rpc.peterpan.com.core.codec.RpcDecoder;
 import rpc.peterpan.com.core.codec.RpcEncoder;
 import rpc.peterpan.com.common.MsgType;
-import rpc.peterpan.com.common.ProtocolConstants;
 import rpc.peterpan.com.config.RpcConfig;
 import rpc.peterpan.com.core.protocol.RpcProtocol;
 import rpc.peterpan.com.core.protocol.body.RpcRequestBody;
@@ -33,6 +31,7 @@ import java.util.concurrent.*;
 
 import static rpc.peterpan.com.common.ProtocolConstants.MAGIC;
 import static rpc.peterpan.com.common.ProtocolConstants.VERSION;
+import static rpc.peterpan.com.common.StatusConstants.NORMAL;
 import static rpc.peterpan.com.util.UUIDGenerator.generateUUID;
 
 /**
@@ -93,12 +92,11 @@ public class RpcClientProxy implements InvocationHandler {
 
         // 构建消息头
         MsgHeader reqHeader = new MsgHeader();
-        reqHeader.setMagic(ProtocolConstants.MAGIC);
-        reqHeader.setMsgLen(bytes.length);
+        reqHeader.setMagic(MAGIC);
         reqHeader.setVersion(VERSION);
         reqHeader.setSerialization(serializationType); // 配置文件读取方
         reqHeader.setMsgType(msgType); // 注意这里是请求REQUEST
-        reqHeader.setStatus((byte) StatusConstants.NORMAL);
+        reqHeader.setStatus((byte) NORMAL);
         reqHeader.setRequestId(RequestIdGenerator.generateRequestId());
 
         long endTime = System.nanoTime();

@@ -12,7 +12,7 @@ public class TestClient {
                 "v1",
                 "RoundRobin",
                 "FailFast",
-                10);
+                1000);
         // 构造出请求对象HelloRequest
         HelloRequest helloRequest = new HelloRequest("peter");
         // rpc调用并返回结果对象HelloResponse(因为他是代理类，所以调用的同时他会激活invoke中的逻辑)

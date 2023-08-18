@@ -45,10 +45,10 @@ public class RpcServerTransfer {
     }
 
     public RpcServerTransfer() throws Exception {
-        int corePoolSize = 2; // 5
-        int maximumPoolSize = 4; // 50
+        int corePoolSize = 10; // 5
+        int maximumPoolSize = 50; // 50
         long keepAliveTime = 60;
-        BlockingQueue<Runnable> workingQueue = new ArrayBlockingQueue<>(1); // 100
+        BlockingQueue<Runnable> workingQueue = new ArrayBlockingQueue<>(100); // 100
         ThreadFactory threadFactory = Executors.defaultThreadFactory();
         // 创建自定义的拒绝策略实例
         RejectedExecutionHandler rejectedExecutionHandler = new ExceptionStatusRejectedExecutionHandler();

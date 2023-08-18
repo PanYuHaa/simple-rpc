@@ -25,7 +25,6 @@ public class RpcClientTransfer {
             // 发送【transfer层】
             objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             objectInputStream = new ObjectInputStream(socket.getInputStream());
-//            objectOutputStream.writeObject(rpcRequest); // 在发送端发送两个连续的消息，模拟粘包
             objectOutputStream.writeObject(rpcRequest);
             objectOutputStream.flush();
 
@@ -35,16 +34,6 @@ public class RpcClientTransfer {
             if (rpcResponse.getHeader().getStatus() == StatusConstants.EXCEPTION) {
                 throw new IOException("服务线程池执行拒绝策略");
             }
-
-//            // 校验body长度，预防粘包问题
-//            if (rpcResponse.getHeader().getMsgLen() < rpcResponse.getBody().length) {
-//                throw new IOException("出现粘包异常");
-//            }
-//
-//            // 校验body长度，预防半包问题
-//            if (rpcResponse.getHeader().getMsgLen() > rpcResponse.getBody().length) {
-//                throw new IOException("出现半包异常");
-//            }
 
             return rpcResponse;
         } catch (IOException e) {

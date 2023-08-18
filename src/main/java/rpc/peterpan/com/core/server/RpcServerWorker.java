@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.reflect.FastClass;
+import rpc.peterpan.com.common.StatusConstants;
 import rpc.peterpan.com.core.codec.RpcDecoder;
 import rpc.peterpan.com.core.codec.RpcEncoder;
 import rpc.peterpan.com.common.MsgType;
@@ -16,7 +17,6 @@ import rpc.peterpan.com.util.redisKey.RpcServiceNameBuilder;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.HashMap;
 
@@ -82,7 +82,7 @@ public class RpcServerWorker implements Runnable {
                 respHeader.setVersion(VERSION);
                 respHeader.setSerialization(serializationType); // 配置文件读取方式，暂时使用hessian
                 respHeader.setMsgType(msgType);
-                respHeader.setStatus((byte) NORMAL);
+                reqHeader.setStatus((byte) NORMAL);
 
                 // 响应消息体
                 RpcResponseBody rpcResponseBody = RpcResponseBody.builder()

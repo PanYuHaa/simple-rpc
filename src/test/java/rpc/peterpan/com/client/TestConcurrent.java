@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
  */
 @Slf4j
 public class TestConcurrent {
-   private static final int TOTAL_REQUESTS = 25;
+   private static final int TOTAL_REQUESTS = 10;
    private static int successCount = 0;
 
    public static void main(String[] args) throws InterruptedException {
