@@ -2,6 +2,7 @@ package rpc.peterpan.com.core.client;
 
 import lombok.extern.slf4j.Slf4j;
 import rpc.peterpan.com.common.ServiceMeta;
+import rpc.peterpan.com.common.StatusConstants;
 import rpc.peterpan.com.core.codec.RpcDecoder;
 import rpc.peterpan.com.core.codec.RpcEncoder;
 import rpc.peterpan.com.common.MsgType;
@@ -20,6 +21,8 @@ import rpc.peterpan.com.router.tolerant.IFaultTolerantHandler;
 import rpc.peterpan.com.registry.IRegistryService;
 import rpc.peterpan.com.registry.RegistryFactory;
 import rpc.peterpan.com.registry.RegistryType;
+import rpc.peterpan.com.util.RequestIdGenerator;
+import rpc.peterpan.com.util.UUIDGenerator;
 import rpc.peterpan.com.util.redisKey.RpcServiceNameBuilder;
 
 import java.lang.reflect.InvocationHandler;
@@ -30,6 +33,7 @@ import java.util.concurrent.*;
 
 import static rpc.peterpan.com.common.ProtocolConstants.MAGIC;
 import static rpc.peterpan.com.common.ProtocolConstants.VERSION;
+import static rpc.peterpan.com.util.UUIDGenerator.generateUUID;
 
 /**
  * @author PeterPan
@@ -94,12 +98,13 @@ public class RpcClientProxy implements InvocationHandler {
         reqHeader.setVersion(VERSION);
         reqHeader.setSerialization(serializationType); // 配置文件读取方
         reqHeader.setMsgType(msgType); // 注意这里是请求REQUEST
-        reqHeader.setStatus((byte) 0x1);
+        reqHeader.setStatus((byte) StatusConstants.NORMAL);
+        reqHeader.setRequestId(RequestIdGenerator.generateRequestId());
 
         long endTime = System.nanoTime();
         long executionTime = (endTime - startTime) / 1_000_000; // 计算执行时间(毫秒为单位)
         int byteSize = bytes.length;
-        log.info("[{}_{}${}] - 序列化执行时间={}ms, 数据大小={}byte", method.getDeclaringClass().getName(), serviceVersion, method.getName(), executionTime, byteSize);
+//        log.info("requestID={}, [执行{}序列化方式] - [{}_{}${}] - 序列化执行时间={}ms, 数据大小={}byte", reqHeader.getRequestId(), SerializationTypeEnum.findByType(serializationType), method.getDeclaringClass().getName(), serviceVersion, method.getName(), executionTime, byteSize);
 
         // 2、创建RPC协议，将Header、Body的内容设置好（Body中存放调用编码）【protocol层】
         RpcProtocol rpcRequest = new RpcProtocol();
@@ -127,7 +132,6 @@ public class RpcClientProxy implements InvocationHandler {
             Future<RpcProtocol> future = executorService.submit(() -> rpcClient.sendRequest(rpcRequest, finalCurServiceMeta));
             try {
                 RpcProtocol rpcResponse = future.get(timeout, TimeUnit.MILLISECONDS);
-                log.info("rpc 调用成功, serviceKey={}, interface={}", serviceKey, rpcRequestBody.getMethodName());
 
                 // 4、解析RpcResponse，也就是在解析rpc协议【protocol层】
                 MsgHeader respHeader = rpcResponse.getHeader(); // 来自于响应的header
@@ -136,6 +140,7 @@ public class RpcClientProxy implements InvocationHandler {
                     // 将RpcResponse的body中的返回编码，解码成我们需要的对象Object并返回【codec层】
                     RpcResponseBody rpcResponseBody = (RpcResponseBody) RpcDecoder.decode(body, respHeader.getSerialization(), respHeader.getMsgType());
                     Object retObject = rpcResponseBody.getRetObject();
+                    log.info("requestID={}, rpc 调用成功, serviceKey={}, interface={}", respHeader.getRequestId(), serviceKey, rpcRequestBody.getMethodName());
                     return retObject;
                 }
             } catch (TimeoutException e) {
@@ -151,6 +156,7 @@ public class RpcClientProxy implements InvocationHandler {
                                 .serviceMetas(serviceMetas)
                                 .count(count)
                                 .retryCount(retryCount)
+                                .requestId(reqHeader.getRequestId())
                                 .build()
                         );
                 if (ftCtx == null) {
@@ -169,6 +175,7 @@ public class RpcClientProxy implements InvocationHandler {
                                 .serviceMetas(serviceMetas)
                                 .count(count)
                                 .retryCount(retryCount)
+                                .requestId(reqHeader.getRequestId())
                                 .build()
                 );
                 if (ftCtx == null) {
@@ -178,8 +185,7 @@ public class RpcClientProxy implements InvocationHandler {
             }
 
         }
-
-        throw new RuntimeException("RPC调用失败，超过最大重试次数=" + retryCount + ", serviceKey=" + serviceKey + ", interface=" + rpcRequestBody.getMethodName());
+        throw new RuntimeException("requestID=" + reqHeader.getRequestId() + ", RPC调用失败，超过最大重试次数=" + retryCount + ", serviceKey=" + serviceKey + ", interface=" + rpcRequestBody.getMethodName());
     }
 }
 

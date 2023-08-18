@@ -23,13 +23,13 @@ public class FailoverFaultTolerantHandler implements IFaultTolerantHandler {
         ServiceMeta curServiceMeta = ctx.getServiceMeta();
         List<ServiceMeta> serviceMetas = ctx.getServiceMetas();
 
-        log.warn("errorMsg={}, 触发 FailFast 策略, 第{}次重试, serviceKey={}, interface={}", ctx.getErrorMsg(), curCount, ctx.getServiceKey(), ctx.getMethodName());
+        log.warn("requestId={}, errorMsg={}, 触发 Failover 策略, 第{}次重试, serviceKey={}, interface={}", ctx.getRequestId(), ctx.getErrorMsg(), curCount, ctx.getServiceKey(), ctx.getMethodName());
         curCount++;
         serviceMetas.remove(curServiceMeta);
         if (!ObjectUtils.isEmpty(serviceMetas)) {
             curServiceMeta = serviceMetas.get(0);
         } else {
-            log.warn("errorMsg={}, 触发 FailFast 策略, 无服务可用, serviceKey={}, interface={}", ctx.getErrorMsg(), ctx.getServiceKey(), ctx.getMethodName());
+            log.warn("requestId={}, errorMsg={}, 触发 Failover 策略, 无服务可用, serviceKey={}, interface={}", ctx.getRequestId(), ctx.getErrorMsg(), ctx.getServiceKey(), ctx.getMethodName());
             curCount = ctx.getRetryCount();
         }
         return FaultTolerantContext.builder()

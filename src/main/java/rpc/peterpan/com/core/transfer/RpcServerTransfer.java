@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import rpc.peterpan.com.common.ServiceMeta;
 import rpc.peterpan.com.config.RpcConfig;
 import rpc.peterpan.com.core.server.RpcServerWorker;
+import rpc.peterpan.com.core.transfer.RejectedExecutionHandler.ExceptionStatusRejectedExecutionHandler;
 import rpc.peterpan.com.registry.IRegistryService;
 import rpc.peterpan.com.registry.RegistryFactory;
 import rpc.peterpan.com.registry.RegistryType;
@@ -44,12 +45,22 @@ public class RpcServerTransfer {
     }
 
     public RpcServerTransfer() throws Exception {
-        int corePoolSize = 5;
-        int maximumPoolSize = 50;
+        int corePoolSize = 2; // 5
+        int maximumPoolSize = 4; // 50
         long keepAliveTime = 60;
-        BlockingQueue<Runnable> workingQueue = new ArrayBlockingQueue<>(100);
+        BlockingQueue<Runnable> workingQueue = new ArrayBlockingQueue<>(1); // 100
         ThreadFactory threadFactory = Executors.defaultThreadFactory();
-        this.threadPool = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.SECONDS, workingQueue, threadFactory);
+        // 创建自定义的拒绝策略实例
+        RejectedExecutionHandler rejectedExecutionHandler = new ExceptionStatusRejectedExecutionHandler();
+        this.threadPool = new ThreadPoolExecutor(
+                corePoolSize,
+                maximumPoolSize,
+                keepAliveTime,
+                TimeUnit.SECONDS,
+                workingQueue,
+                threadFactory,
+                rejectedExecutionHandler // 设置自定义拒绝策略
+        );
         this.registeredService = new HashMap<String, Object>();
         this.rpcConfig = RpcConfig.getInstance();
         this.registryCenter = RegistryFactory.getInstance(RegistryType.toRegistry(rpcConfig.getRegisterType()));
