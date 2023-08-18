@@ -23,4 +23,5 @@ public class FaultTolerantContext {
     List<ServiceMeta> serviceMetas;
     int count;
     int retryCount;
+    long requestId;
 }

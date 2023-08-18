@@ -13,7 +13,7 @@ import rpc.peterpan.com.router.tolerant.IFaultTolerantHandler;
 public class FailFastFaultTolerantHandler implements IFaultTolerantHandler {
     @Override
     public FaultTolerantContext tolerant(FaultTolerantContext ctx) {
-        log.warn("errorMsg={}, 触发 FailFast 策略, serviceKey={}, interface={}", ctx.getErrorMsg(), ctx.getServiceKey(), ctx.getMethodName());
+        log.warn("requestId={}, errorMsg={}, 触发 FailFast 策略, serviceKey={}, interface={}", ctx.getRequestId(), ctx.getErrorMsg(), ctx.getServiceKey(), ctx.getMethodName());
         return FaultTolerantContext.builder()
                 .count(ctx.getRetryCount())
                 .build();

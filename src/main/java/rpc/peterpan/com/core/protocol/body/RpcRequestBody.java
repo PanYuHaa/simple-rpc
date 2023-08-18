@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * @author PeterPan
  * @date 2023/7/11
- * @description RPC请求的body内容
+ * @description RPC请求的body协议
  */
 @Data
 @Builder

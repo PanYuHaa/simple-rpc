@@ -46,7 +46,6 @@ public class RpcConfig {
      */
     public byte getSerializationByte() {
         String serializationType = properties.getProperty("serializationType");
-        log.info("执行[{}]序列化方式", serializationType);
         // 根据读取的字符串值，映射为对应的byte值，暂时支持两种，默认HESSIAN
         if ("JSON".equalsIgnoreCase(serializationType)) {
             return (byte) SerializationTypeEnum.JSON.getType();
