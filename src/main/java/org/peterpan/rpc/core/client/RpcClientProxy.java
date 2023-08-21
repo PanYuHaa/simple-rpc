@@ -46,13 +46,16 @@ public class RpcClientProxy implements InvocationHandler {
     private int retryCount; // 重试次数
     private long timeout; // 超时控制
 
-    public RpcClientProxy(RpcConfig rpcConfig) {
+    public RpcClientProxy(RpcConfig rpcConfig) throws Exception {
+        // 初始化使用到的组件
+        RegistryFactory.init();
+
         this.rpcConfig = rpcConfig;
     }
 
     @SuppressWarnings("unchecked")
     public <T> T getService(Class<T> clazz, String serviceVersion, String loadBalancerType, String faultTolerantType, long timeout) throws Exception {
-        this.registryCenter = RegistryFactory.getInstance(RegistryType.toRegistry(rpcConfig.getRegisterType()));
+        this.registryCenter = RegistryFactory.get(RpcConfig.getInstance().getRegisterType());
         this.serviceVersion = serviceVersion;
         this.loadBalancerType = LoadBalancerType.toLoadBalancer(loadBalancerType);
         this.faultTolerantType = FaultTolerantType.toFaultTolerant(faultTolerantType);

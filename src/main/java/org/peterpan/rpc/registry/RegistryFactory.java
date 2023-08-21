@@ -3,6 +3,7 @@ package org.peterpan.rpc.registry;
 
 import org.peterpan.rpc.registry.impl.RedisRegistry;
 import org.peterpan.rpc.registry.impl.ZookeeperRegistry;
+import org.peterpan.rpc.spi.ExtensionLoader;
 
 /**
  * @author PeterPan
@@ -13,25 +14,12 @@ import org.peterpan.rpc.registry.impl.ZookeeperRegistry;
  */
 public class RegistryFactory {
 
-   private static volatile IRegistryService IRegistryService;
+   public static IRegistryService get(String registryService) throws Exception {
+      return ExtensionLoader.getInstance().get(registryService);
+   }
 
-
-   public static IRegistryService getInstance(RegistryType type) throws Exception {
-
-      if (null == IRegistryService) {
-         synchronized (RegistryFactory.class) {
-            if (null == IRegistryService) {
-               switch (type) {
-                  case ZOOKEEPER:
-                     IRegistryService = new ZookeeperRegistry();
-                     break;
-                  case REDIS:
-                     IRegistryService = new RedisRegistry();
-               }
-            }
-         }
-      }
-      return IRegistryService;
+   public static void init() throws Exception {
+      ExtensionLoader.getInstance().loadExtension(IRegistryService.class);
    }
 
 }
