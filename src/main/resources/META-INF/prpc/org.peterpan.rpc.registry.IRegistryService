@@ -1,0 +1,2 @@
+redis=org.peterpan.rpc.registry.RedisRegistry
+zookeeper=org.peterpan.rpc.registry.ZookeeperRegistry
