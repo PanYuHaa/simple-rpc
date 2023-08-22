@@ -63,6 +63,9 @@ public class RedisRegistry implements IRegistryService {
      * 使用集合存储服务节点信息
      */
     public RedisRegistry() throws Exception {
+        // 加载组件
+        LoadBalancerFactory.init();
+
         // 获取 RpcProperties 的实例
         RpcConfig properties = RpcConfig.getInstance();
 
@@ -82,9 +85,6 @@ public class RedisRegistry implements IRegistryService {
 
         // 健康监测(redis注册中心开启之后，心跳检测就开始）
         heartbeat();
-
-        // 加载组件
-        LoadBalancerFactory.init();
     }
 
 

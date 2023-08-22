@@ -3,6 +3,7 @@ package org.peterpan.rpc.core.codec;
 import org.peterpan.rpc.core.codec.serialization.IRpcSerialization;
 import org.peterpan.rpc.core.codec.serialization.SerializationFactory;
 import org.peterpan.rpc.common.MsgType;
+import org.peterpan.rpc.core.codec.serialization.SerializationTypeEnum;
 import org.peterpan.rpc.core.protocol.body.RpcRequestBody;
 import org.peterpan.rpc.core.protocol.body.RpcResponseBody;
 
@@ -15,7 +16,7 @@ import java.io.IOException;
  */
 public class RpcDecoder {
 
-   public static Object decode(byte[] body, byte serializationType, byte msgType) throws IOException {
+   public static Object decode(byte[] body, byte serializationType, byte msgType) throws Exception {
       // 处理消息的类型
       MsgType msgTypeEnum = MsgType.findByType(msgType);
       if (msgTypeEnum == null) {
@@ -23,7 +24,7 @@ public class RpcDecoder {
       }
 
       // 获取序列化器
-      IRpcSerialization IRpcSerialization = SerializationFactory.getRpcSerialization(serializationType);
+      IRpcSerialization IRpcSerialization = SerializationFactory.get(SerializationTypeEnum.findByType(serializationType).name());
       // 根据消息类型进行处理(如果消息类型过多可以使用策略+工厂模式进行管理)
       switch (msgTypeEnum) {
          // 请求消息

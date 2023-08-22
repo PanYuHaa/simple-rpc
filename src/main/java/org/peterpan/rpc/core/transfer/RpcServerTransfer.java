@@ -3,6 +3,7 @@ package org.peterpan.rpc.core.transfer;
 import lombok.extern.slf4j.Slf4j;
 import org.peterpan.rpc.common.ServiceMeta;
 import org.peterpan.rpc.config.RpcConfig;
+import org.peterpan.rpc.core.codec.serialization.SerializationFactory;
 import org.peterpan.rpc.core.server.RpcServerWorker;
 import org.peterpan.rpc.core.transfer.RejectedExecutionHandler.ExceptionStatusRejectedExecutionHandler;
 import org.peterpan.rpc.registry.IRegistryService;
@@ -45,6 +46,10 @@ public class RpcServerTransfer {
     }
 
     public RpcServerTransfer() throws Exception {
+        // 加载组件
+        RegistryFactory.init();
+        SerializationFactory.init();
+
         int corePoolSize = 10; // 5
         int maximumPoolSize = 50; // 50
         long keepAliveTime = 60;
@@ -64,9 +69,6 @@ public class RpcServerTransfer {
         this.registeredService = new HashMap<String, Object>();
         this.rpcConfig = RpcConfig.getInstance();
         this.registryCenter = RegistryFactory.get(RpcConfig.getInstance().getRegisterType());
-
-        // 加载组件
-        RegistryFactory.init();
     }
 
     // 参数service就是interface的implementation object

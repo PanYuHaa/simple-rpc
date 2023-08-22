@@ -1,3 +1,3 @@
 JSON=org.peterpan.rpc.core.codec.serialization.impl.JsonSerialization
-HESSIAN=org.peterpan.rpc.protocol.codec.serialization.impl.HessianSerialization
-JAVA=org.peterpan.rpc.protocol.codec.serialization.impl.JavaSerialization
+HESSIAN=org.peterpan.rpc.core.codec.serialization.impl.HessianSerialization
+JAVA=org.peterpan.rpc.core.codec.serialization.impl.JavaSerialization

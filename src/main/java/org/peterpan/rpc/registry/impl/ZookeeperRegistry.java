@@ -48,6 +48,9 @@ public class ZookeeperRegistry implements IRegistryService {
     * @throws Exception 可能会抛出异常，例如无法连接到 ZooKeeper 服务器时抛出连接异常。
     */
    public ZookeeperRegistry() throws Exception {
+      // 加载组件
+      LoadBalancerFactory.init();
+
       // 获取注册中心地址
       String registerAddr = RpcConfig.getInstance().getRegisterAddr();
 
@@ -69,9 +72,6 @@ public class ZookeeperRegistry implements IRegistryService {
 
       // 启动 ServiceDiscovery
       this.serviceDiscovery.start();
-
-      // 加载组件
-      LoadBalancerFactory.init();
    }
 
 

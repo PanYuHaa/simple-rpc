@@ -8,6 +8,7 @@ import org.peterpan.rpc.common.StatusConstants;
 import org.peterpan.rpc.config.RpcConfig;
 import org.peterpan.rpc.core.codec.RpcDecoder;
 import org.peterpan.rpc.core.codec.RpcEncoder;
+import org.peterpan.rpc.core.codec.serialization.SerializationFactory;
 import org.peterpan.rpc.core.protocol.RpcProtocol;
 import org.peterpan.rpc.core.protocol.body.RpcRequestBody;
 import org.peterpan.rpc.core.protocol.body.RpcResponseBody;
@@ -47,10 +48,11 @@ public class RpcClientProxy implements InvocationHandler {
     private long timeout; // 超时控制
 
     public RpcClientProxy(RpcConfig rpcConfig) throws Exception {
-        this.rpcConfig = rpcConfig;
-
         // 加载组件
         RegistryFactory.init();
+        SerializationFactory.init();
+
+        this.rpcConfig = rpcConfig;
     }
 
     @SuppressWarnings("unchecked")
