@@ -2,6 +2,7 @@ package org.peterpan.rpc.router.loadbalancer;
 
 import org.peterpan.rpc.router.loadbalancer.impl.ConsistentHashLoadBalancer;
 import org.peterpan.rpc.router.loadbalancer.impl.RoundRobinLoadBalancer;
+import org.peterpan.rpc.spi.ExtensionLoader;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,16 +13,14 @@ import java.util.Map;
  * @description 负载均衡工厂
  */
 public class LoadBalancerFactory {
+    public static IServiceLoadBalancer get(String serviceLoadBalancer) throws Exception {
 
-   private static Map<LoadBalancerType, IServiceLoadBalancer> serviceLoadBalancerMap = new HashMap<>();
+        return ExtensionLoader.getInstance().get(serviceLoadBalancer);
 
-   static {
-      serviceLoadBalancerMap.put(LoadBalancerType.CONSISTENT_HASH,new ConsistentHashLoadBalancer());
-      serviceLoadBalancerMap.put(LoadBalancerType.RoundRobin,new RoundRobinLoadBalancer());
-   }
-   public static IServiceLoadBalancer getInstance(LoadBalancerType type) throws Exception {
+    }
 
-      return serviceLoadBalancerMap.get(type);
-   }
+    public static void init() throws Exception {
+        ExtensionLoader.getInstance().loadExtension(IServiceLoadBalancer.class);
+    }
 }
 

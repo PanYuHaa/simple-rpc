@@ -41,23 +41,23 @@ public class RpcClientProxy implements InvocationHandler {
     private RpcConfig rpcConfig; // Rpc配置中心
     private IRegistryService registryCenter; // 注册中心
     private String serviceVersion; // 服务版本
-    private LoadBalancerType loadBalancerType; // 负载均衡类型
+    private String loadBalancerType; // 负载均衡类型
     private FaultTolerantType faultTolerantType; // 容错类型
     private int retryCount; // 重试次数
     private long timeout; // 超时控制
 
     public RpcClientProxy(RpcConfig rpcConfig) throws Exception {
-        // 初始化使用到的组件
-        RegistryFactory.init();
-
         this.rpcConfig = rpcConfig;
+
+        // 加载组件
+        RegistryFactory.init();
     }
 
     @SuppressWarnings("unchecked")
     public <T> T getService(Class<T> clazz, String serviceVersion, String loadBalancerType, String faultTolerantType, long timeout) throws Exception {
         this.registryCenter = RegistryFactory.get(RpcConfig.getInstance().getRegisterType());
         this.serviceVersion = serviceVersion;
-        this.loadBalancerType = LoadBalancerType.toLoadBalancer(loadBalancerType);
+        this.loadBalancerType = loadBalancerType;
         this.faultTolerantType = FaultTolerantType.toFaultTolerant(faultTolerantType);
         this.retryCount = Integer.valueOf(rpcConfig.getRetryCount());
         this.timeout = timeout;

@@ -62,7 +62,7 @@ public class RedisRegistry implements IRegistryService {
      * 注册当前服务,将当前服务ip，端口，时间注册到redis当中，并且开启定时任务
      * 使用集合存储服务节点信息
      */
-    public RedisRegistry() {
+    public RedisRegistry() throws Exception {
         // 获取 RpcProperties 的实例
         RpcConfig properties = RpcConfig.getInstance();
 
@@ -82,6 +82,9 @@ public class RedisRegistry implements IRegistryService {
 
         // 健康监测(redis注册中心开启之后，心跳检测就开始）
         heartbeat();
+
+        // 加载组件
+        LoadBalancerFactory.init();
     }
 
 
@@ -238,8 +241,9 @@ public class RedisRegistry implements IRegistryService {
     }
 
     @Override
-    public ServiceMeta discovery(String serviceName, int invokerHashCode, LoadBalancerType loadBalancerType) throws Exception {
-        IServiceLoadBalancer<ServiceMeta> loadBalancer = LoadBalancerFactory.getInstance(loadBalancerType);
+    public ServiceMeta discovery(String serviceName, int invokerHashCode, String loadBalancerType) throws Exception {
+//        IServiceLoadBalancer<ServiceMeta> loadBalancer = LoadBalancerFactory.getInstance(loadBalancerType);
+        IServiceLoadBalancer<ServiceMeta> loadBalancer = LoadBalancerFactory.get(loadBalancerType);
         List<ServiceMeta> serviceMetas = listServices(serviceName);
         return loadBalancer.select(serviceMetas, invokerHashCode);
     }

@@ -45,9 +45,6 @@ public class RpcServerTransfer {
     }
 
     public RpcServerTransfer() throws Exception {
-        // 初始化使用到的组件
-        RegistryFactory.init();
-
         int corePoolSize = 10; // 5
         int maximumPoolSize = 50; // 50
         long keepAliveTime = 60;
@@ -67,6 +64,9 @@ public class RpcServerTransfer {
         this.registeredService = new HashMap<String, Object>();
         this.rpcConfig = RpcConfig.getInstance();
         this.registryCenter = RegistryFactory.get(RpcConfig.getInstance().getRegisterType());
+
+        // 加载组件
+        RegistryFactory.init();
     }
 
     // 参数service就是interface的implementation object

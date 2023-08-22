@@ -69,6 +69,9 @@ public class ZookeeperRegistry implements IRegistryService {
 
       // 启动 ServiceDiscovery
       this.serviceDiscovery.start();
+
+      // 加载组件
+      LoadBalancerFactory.init();
    }
 
 
@@ -121,9 +124,9 @@ public class ZookeeperRegistry implements IRegistryService {
     * @throws Exception 如果在服务发现过程中出现错误。
     */
    @Override
-   public ServiceMeta discovery(String serviceName, int invokerHashCode, LoadBalancerType loadBalancerType) throws Exception {
+   public ServiceMeta discovery(String serviceName, int invokerHashCode, String loadBalancerType) throws Exception {
       List<ServiceMeta> serviceMetas = listServices(serviceName);
-      IServiceLoadBalancer<ServiceMeta> loadBalancer = LoadBalancerFactory.getInstance(loadBalancerType);
+      IServiceLoadBalancer<ServiceMeta> loadBalancer = LoadBalancerFactory.get(loadBalancerType);
       ServiceMeta serviceMeta = loadBalancer.select(serviceMetas, invokerHashCode);
       return serviceMeta;
    }
