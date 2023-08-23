@@ -1,5 +1,6 @@
 package org.peterpan.rpc.spi;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2023/8/21
  * @description SPI机制
  */
-public class ExtensionLoader{
-
-    private Logger logger = LoggerFactory.getLogger(ExtensionLoader.class);
+@Slf4j
+public class ExtensionLoader {
 
     // 系统SPI
     private static String SYS_EXTENSION_LOADER_DIR_PREFIX = "META-INF/prpc/";
@@ -30,7 +30,7 @@ public class ExtensionLoader{
     // bean定义信息 key: 定义的key value：具体类
     private static Map<String, Class> extensionClassCache = new ConcurrentHashMap<>();
     // bean 定义信息 key：接口 value：接口子类s
-    private static Map<String, Map<String,Class>> extensionClassCaches = new ConcurrentHashMap<>();
+    private static Map<String, Map<String, Class>> extensionClassCaches = new ConcurrentHashMap<>();
 
     // 实例化的bean(懒加载)
     private static Map<String, Object> singletonsObject = new ConcurrentHashMap<>();
@@ -42,15 +42,17 @@ public class ExtensionLoader{
         extensionLoader = new ExtensionLoader();
     }
 
-    public static ExtensionLoader getInstance(){
+    public static ExtensionLoader getInstance() {
         return extensionLoader;
     }
 
-    private ExtensionLoader(){
+    private ExtensionLoader() {
 
     }
+
     /**
      * 获取bean
+     *
      * @param name
      * @return
      * @throws IOException
@@ -71,6 +73,7 @@ public class ExtensionLoader{
 
     /**
      * 获取接口下所有的类
+     *
      * @param clazz
      * @return
      */
@@ -86,10 +89,10 @@ public class ExtensionLoader{
         }
         final Map<String, Class> stringClassMap = extensionClassCaches.get(name);
         List<Object> objects = new ArrayList<>();
-        if (stringClassMap.size() > 0){
-            stringClassMap.forEach((k,v)->{
+        if (stringClassMap.size() > 0) {
+            stringClassMap.forEach((k, v) -> {
                 try {
-                    objects.add(singletonsObject.getOrDefault(k,v.newInstance()));
+                    objects.add(singletonsObject.getOrDefault(k, v.newInstance()));
                 } catch (InstantiationException e) {
                     e.printStackTrace();
                 } catch (IllegalAccessException e) {
@@ -103,6 +106,7 @@ public class ExtensionLoader{
 
     /**
      * 根据spi机制初加载bean的信息放入map
+     *
      * @param clazz
      * @throws IOException
      * @throws ClassNotFoundException
@@ -130,11 +134,11 @@ public class ExtensionLoader{
                     final Class<?> aClass = Class.forName(name);
                     extensionClassCache.put(key, aClass);
                     classMap.put(key, aClass);
-                    logger.info("加载bean key:{} , value:{}",key,name);
+                    log.info("加载bean key={}, value={}", key, name);
                 }
             }
         }
-        extensionClassCaches.put(clazz.getName(),classMap);
+        extensionClassCaches.put(clazz.getName(), classMap);
     }
 
 }
