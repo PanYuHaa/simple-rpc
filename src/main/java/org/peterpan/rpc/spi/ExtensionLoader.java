@@ -27,9 +27,9 @@ public class ExtensionLoader {
 
     private static String[] prefixs = {SYS_EXTENSION_LOADER_DIR_PREFIX, DIY_EXTENSION_LOADER_DIR_PREFIX};
 
-    // bean定义信息 key: 定义的key value：具体类
+    // bean map 定义信息: key=自定义的key, value=具体bean
     private static Map<String, Class> extensionClassCache = new ConcurrentHashMap<>();
-    // bean 定义信息 key：接口 value：接口子类s
+    // 接口名与 bean map 的映射: key=接口名, value=接口名下的 bean map
     private static Map<String, Map<String, Class>> extensionClassCaches = new ConcurrentHashMap<>();
 
     // 实例化的bean(懒加载)
@@ -61,7 +61,7 @@ public class ExtensionLoader {
     public <V> V get(String name) {
         if (!singletonsObject.containsKey(name)) {
             try {
-                singletonsObject.put(name, extensionClassCache.get(name).newInstance());
+                singletonsObject.put(name, extensionClassCache.get(name).newInstance()); // 根据需要懒加载出来我们要的bean
             } catch (InstantiationException e) {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {
@@ -92,7 +92,7 @@ public class ExtensionLoader {
         if (stringClassMap.size() > 0) {
             stringClassMap.forEach((k, v) -> {
                 try {
-                    objects.add(singletonsObject.getOrDefault(k, v.newInstance()));
+                    objects.add(singletonsObject.getOrDefault(k, v.newInstance())); // 尝试从 singletonsObject 缓存中获取对象实例。如果缓存中不存在该实例，则通过反射创建一个新的实例。
                 } catch (InstantiationException e) {
                     e.printStackTrace();
                 } catch (IllegalAccessException e) {
@@ -124,21 +124,21 @@ public class ExtensionLoader {
             while (enumeration.hasMoreElements()) {
                 URL url = enumeration.nextElement();
                 InputStreamReader inputStreamReader = null;
-                inputStreamReader = new InputStreamReader(url.openStream());
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                inputStreamReader = new InputStreamReader(url.openStream()); // InputStream
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader); // Reader
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     String[] lineArr = line.split("=");
                     String key = lineArr[0];
                     String name = lineArr[1];
-                    final Class<?> aClass = Class.forName(name);
+                    final Class<?> aClass = Class.forName(name); // name为接口下的bean名
                     extensionClassCache.put(key, aClass);
                     classMap.put(key, aClass);
                     log.info("加载bean key={}, value={}", key, name);
                 }
             }
         }
-        extensionClassCaches.put(clazz.getName(), classMap);
+        extensionClassCaches.put(clazz.getName(), classMap); // key为接口名，val为map里面包含的所有的接口实现方案
     }
 
 }
