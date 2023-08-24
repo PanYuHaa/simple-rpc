@@ -5,6 +5,7 @@ import org.peterpan.rpc.common.MsgType;
 import org.peterpan.rpc.common.ProtocolConstants;
 import org.peterpan.rpc.common.ServiceMeta;
 import org.peterpan.rpc.common.StatusConstants;
+import org.peterpan.rpc.config.FilterConfig;
 import org.peterpan.rpc.config.RpcConfig;
 import org.peterpan.rpc.core.codec.RpcDecoder;
 import org.peterpan.rpc.core.codec.RpcEncoder;
@@ -14,10 +15,10 @@ import org.peterpan.rpc.core.protocol.body.RpcRequestBody;
 import org.peterpan.rpc.core.protocol.body.RpcResponseBody;
 import org.peterpan.rpc.core.protocol.header.MsgHeader;
 import org.peterpan.rpc.core.transfer.RpcClientTransfer;
+import org.peterpan.rpc.filter.FilterChain;
+import org.peterpan.rpc.filter.FilterData;
 import org.peterpan.rpc.registry.IRegistryService;
 import org.peterpan.rpc.registry.RegistryFactory;
-import org.peterpan.rpc.registry.RegistryType;
-import org.peterpan.rpc.router.loadbalancer.LoadBalancerType;
 import org.peterpan.rpc.router.tolerant.FaultTolerantContext;
 import org.peterpan.rpc.router.tolerant.FaultTolerantFactory;
 import org.peterpan.rpc.router.tolerant.FaultTolerantType;
@@ -51,6 +52,7 @@ public class RpcClientProxy implements InvocationHandler {
         // 加载组件
         RegistryFactory.init();
         SerializationFactory.init();
+        FilterConfig.initClientFilter();
 
         this.rpcConfig = rpcConfig;
     }
@@ -79,6 +81,15 @@ public class RpcClientProxy implements InvocationHandler {
         byte serializationType = rpcConfig.getSerializationByte();
         byte msgType = (byte) MsgType.REQUEST.ordinal();
 
+        // 构建消息头
+        MsgHeader reqHeader = new MsgHeader();
+        reqHeader.setMagic(ProtocolConstants.MAGIC);
+        reqHeader.setVersion(ProtocolConstants.VERSION);
+        reqHeader.setSerialization(serializationType); // 配置文件读取方
+        reqHeader.setMsgType(msgType); // 注意这里是请求REQUEST
+        reqHeader.setStatus((byte) StatusConstants.NORMAL);
+        reqHeader.setRequestId(RequestIdGenerator.generateRequestId());
+
         // 构建消息体
         RpcRequestBody rpcRequestBody = RpcRequestBody.builder()
                 .serviceVersion(serviceVersion)
@@ -91,14 +102,13 @@ public class RpcClientProxy implements InvocationHandler {
         // 序列化
         byte[] bytes = RpcEncoder.encode(rpcRequestBody, serializationType);
 
-        // 构建消息头
-        MsgHeader reqHeader = new MsgHeader();
-        reqHeader.setMagic(ProtocolConstants.MAGIC);
-        reqHeader.setVersion(ProtocolConstants.VERSION);
-        reqHeader.setSerialization(serializationType); // 配置文件读取方
-        reqHeader.setMsgType(msgType); // 注意这里是请求REQUEST
-        reqHeader.setStatus((byte) StatusConstants.NORMAL);
-        reqHeader.setRequestId(RequestIdGenerator.generateRequestId());
+        // 拦截器的上下文
+        final FilterData filterData = new FilterData(rpcRequestBody);
+        try {
+            FilterConfig.getClientBeforeFilterChain().doFilter(filterData);
+        }catch (Throwable e){
+            throw e;
+        }
 
         long endTime = System.nanoTime();
         long executionTime = (endTime - startTime) / 1_000_000; // 计算执行时间(毫秒为单位)
@@ -140,6 +150,11 @@ public class RpcClientProxy implements InvocationHandler {
                     RpcResponseBody rpcResponseBody = (RpcResponseBody) RpcDecoder.decode(body, respHeader.getSerialization(), respHeader.getMsgType());
                     Object retObject = rpcResponseBody.getRetObject();
                     log.info("requestID={}, rpc 调用成功, serviceKey={}, interface={}", respHeader.getRequestId(), serviceKey, rpcRequestBody.getMethodName());
+                    try {
+                        FilterConfig.getClientAfterFilterChain().doFilter(filterData);
+                    }catch (Throwable e){
+                        throw e;
+                    }
                     return retObject;
                 }
             } catch (TimeoutException e) {
