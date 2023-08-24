@@ -1,0 +1,1 @@
+logFilter=org.peterpan.rpc.filter.impl.client.ClientLogFilter
