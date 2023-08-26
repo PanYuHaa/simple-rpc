@@ -1,9 +1,8 @@
 package org.peterpan.rpc.filter.impl.client;
 
+import lombok.extern.slf4j.Slf4j;
 import org.peterpan.rpc.filter.FilterData;
 import org.peterpan.rpc.filter.IClientBeforeFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -11,12 +10,11 @@ import org.slf4j.LoggerFactory;
  * @date 2023/8/21
  * @description 日志
  */
+@Slf4j
 public class ClientLogFilter implements IClientBeforeFilter {
-
-    private Logger logger = LoggerFactory.getLogger(ClientLogFilter.class);
 
     @Override
     public void doFilter(FilterData filterData) {
-        logger.info(filterData.toString());
+        log.info(filterData.toString());
     }
 }

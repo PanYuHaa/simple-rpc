@@ -53,7 +53,7 @@ public class ExtensionLoader {
     /**
      * 获取bean
      *
-     * @param name
+     * @param name(bean)
      * @return
      * @throws IOException
      * @throws ClassNotFoundException
@@ -74,7 +74,7 @@ public class ExtensionLoader {
     /**
      * 获取接口下所有的类
      *
-     * @param clazz
+     * @param clazz(接口）
      * @return
      */
     public List<Object> gets(Class clazz) {
