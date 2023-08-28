@@ -13,3 +13,6 @@
  - [x] 服务治理：故障转移、超时控制
  - [x] 服务注册：服务器怎么才能把自己能够handle的接口告诉客户端，不然自己都不能处理，客户端调用接口，调了也是失败
  - [x] 服务发现：客户端怎么找到能够调用rpc的服务器的ip和端口？
+
+## 项目架构
+![架构](https://github.com/PanYuHaa/simple-rpc/blob/master/assets/RPC%E6%A1%86%E6%9E%B6.png)
