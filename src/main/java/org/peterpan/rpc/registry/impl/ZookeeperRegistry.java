@@ -1,5 +1,12 @@
 package org.peterpan.rpc.registry.impl;
 
+import org.peterpan.rpc.common.RpcServiceNameBuilder;
+import org.peterpan.rpc.common.ServiceMeta;
+import org.peterpan.rpc.config.RpcProperties;
+import org.peterpan.rpc.registry.IRegistryService;
+import org.peterpan.rpc.registry.loadbalancer.LoadBalancerFactory;
+import org.peterpan.rpc.registry.loadbalancer.LoadBalancerType;
+import org.peterpan.rpc.registry.loadbalancer.IServiceLoadBalancer;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
@@ -7,13 +14,6 @@ import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
-import org.peterpan.rpc.router.loadbalancer.IServiceLoadBalancer;
-import org.peterpan.rpc.router.loadbalancer.LoadBalancerType;
-import org.peterpan.rpc.common.ServiceMeta;
-import org.peterpan.rpc.config.RpcConfig;
-import org.peterpan.rpc.router.loadbalancer.LoadBalancerFactory;
-import org.peterpan.rpc.registry.IRegistryService;
-import org.peterpan.rpc.util.redisKey.RpcServiceNameBuilder;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -48,11 +48,8 @@ public class ZookeeperRegistry implements IRegistryService {
     * @throws Exception 可能会抛出异常，例如无法连接到 ZooKeeper 服务器时抛出连接异常。
     */
    public ZookeeperRegistry() throws Exception {
-      // 加载组件
-      LoadBalancerFactory.init();
-
       // 获取注册中心地址
-      String registerAddr = RpcConfig.getInstance().getRegisterAddr();
+      String registerAddr = RpcProperties.getInstance().getRegisterAddr();
 
       // 创建与 ZooKeeper 服务器的连接
       CuratorFramework client = CuratorFrameworkFactory.newClient(registerAddr, new ExponentialBackoffRetry(BASE_SLEEP_TIME_MS, MAX_RETRIES));
@@ -124,9 +121,9 @@ public class ZookeeperRegistry implements IRegistryService {
     * @throws Exception 如果在服务发现过程中出现错误。
     */
    @Override
-   public ServiceMeta discovery(String serviceName, int invokerHashCode, String loadBalancerType) throws Exception {
+   public ServiceMeta discovery(String serviceName, int invokerHashCode, LoadBalancerType loadBalancerType) throws Exception {
       List<ServiceMeta> serviceMetas = listServices(serviceName);
-      IServiceLoadBalancer<ServiceMeta> loadBalancer = LoadBalancerFactory.get(loadBalancerType);
+      IServiceLoadBalancer<ServiceMeta> loadBalancer = LoadBalancerFactory.getInstance(loadBalancerType);
       ServiceMeta serviceMeta = loadBalancer.select(serviceMetas, invokerHashCode);
       return serviceMeta;
    }

@@ -1,2 +1,0 @@
-CONSISTENT_HASH=org.peterpan.rpc.router.loadbalancer.impl.ConsistentHashLoadBalancer
-RoundRobin=org.peterpan.rpc.router.loadbalancer.impl.RoundRobinLoadBalancer

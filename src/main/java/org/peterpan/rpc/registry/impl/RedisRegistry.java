@@ -1,17 +1,17 @@
 package org.peterpan.rpc.registry.impl;
 
 import com.alibaba.fastjson.JSON;
-import org.peterpan.rpc.router.loadbalancer.LoadBalancerType;
+import org.peterpan.rpc.common.RpcServiceNameBuilder;
+import org.peterpan.rpc.common.ServiceMeta;
+import org.peterpan.rpc.config.RpcProperties;
+import org.peterpan.rpc.registry.IRegistryService;
+import org.peterpan.rpc.registry.loadbalancer.LoadBalancerFactory;
+import org.peterpan.rpc.registry.loadbalancer.LoadBalancerType;
+import org.peterpan.rpc.registry.loadbalancer.IServiceLoadBalancer;
+import org.springframework.util.ObjectUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import org.peterpan.rpc.common.ServiceMeta;
-import org.peterpan.rpc.config.RpcConfig;
-import org.peterpan.rpc.router.loadbalancer.IServiceLoadBalancer;
-import org.peterpan.rpc.router.loadbalancer.LoadBalancerFactory;
-import org.peterpan.rpc.registry.IRegistryService;
-import org.peterpan.rpc.util.redisKey.RpcServiceNameBuilder;
-import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PreDestroy;
 import java.util.*;
@@ -62,12 +62,9 @@ public class RedisRegistry implements IRegistryService {
      * 注册当前服务,将当前服务ip，端口，时间注册到redis当中，并且开启定时任务
      * 使用集合存储服务节点信息
      */
-    public RedisRegistry() throws Exception {
-        // 加载组件
-        LoadBalancerFactory.init();
-
+    public RedisRegistry() {
         // 获取 RpcProperties 的实例
-        RpcConfig properties = RpcConfig.getInstance();
+        RpcProperties properties = RpcProperties.getInstance();
 
         // 获取注册地址并拆分成 host 和 port
         String[] split = properties.getRegisterAddr().split(":");
@@ -90,7 +87,7 @@ public class RedisRegistry implements IRegistryService {
 
     private Jedis getJedis() {
         Jedis jedis = jedisPool.getResource();
-        RpcConfig properties = RpcConfig.getInstance();
+        RpcProperties properties = RpcProperties.getInstance();
         jedis.auth(properties.getRegisterPsw());
         return jedis;
     }
@@ -241,9 +238,8 @@ public class RedisRegistry implements IRegistryService {
     }
 
     @Override
-    public ServiceMeta discovery(String serviceName, int invokerHashCode, String loadBalancerType) throws Exception {
-//        IServiceLoadBalancer<ServiceMeta> loadBalancer = LoadBalancerFactory.getInstance(loadBalancerType);
-        IServiceLoadBalancer<ServiceMeta> loadBalancer = LoadBalancerFactory.get(loadBalancerType);
+    public ServiceMeta discovery(String serviceName, int invokerHashCode, LoadBalancerType loadBalancerType) throws Exception {
+        IServiceLoadBalancer<ServiceMeta> loadBalancer = LoadBalancerFactory.getInstance(loadBalancerType);
         List<ServiceMeta> serviceMetas = listServices(serviceName);
         return loadBalancer.select(serviceMetas, invokerHashCode);
     }
@@ -258,26 +254,6 @@ public class RedisRegistry implements IRegistryService {
         // 销毁Jedis连接池
         if (jedisPool != null) {
             jedisPool.close();
-        }
-    }
-
-    public static void main(String[] args) {
-        RpcConfig properties = RpcConfig.getInstance();
-        String[] split = properties.getRegisterAddr().split(":");
-        String host = split[0]; // Redis 主机名或 IP 地址
-        int port = Integer.valueOf(split[1]); // Redis 端口
-        String password = properties.getRegisterPsw(); // Redis 密码
-
-        // 创建 Jedis 实例并进行认证
-        try (Jedis jedis = new Jedis(host, port)) {
-            jedis.auth(password); // 进行认证
-
-            // 执行一些操作，例如执行 Redis 命令
-            jedis.set("key", "value");
-            String value = jedis.get("key");
-            System.out.println("Value: " + value);
-        } catch (Exception e) {
-            System.err.println("Failed to connect to Redis: " + e.getMessage());
         }
     }
 
