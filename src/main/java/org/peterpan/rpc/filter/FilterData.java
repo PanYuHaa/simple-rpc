@@ -26,7 +26,7 @@ public class FilterData {
     private RpcResponseBody data; // 执行业务逻辑后的数据(RpcResponse暂时与xhy不同，因为还需要改动其他地方)
 
     public FilterData(RpcRequestBody request) {
-        this.args = request.getParameters();
+        this.args = request.getParams();
         this.interfaceName = request.getInterfaceName();
         this.methodName = request.getMethodName();
         this.serviceVersion = request.getServiceVersion();

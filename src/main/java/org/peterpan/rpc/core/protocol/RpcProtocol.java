@@ -11,7 +11,7 @@ import java.io.Serializable;
  * @description 协议内容
  */
 @Data
-public class RpcProtocol implements Serializable {
+public class RpcProtocol<T> implements Serializable {
    private MsgHeader header;
-   private byte[] body;
+   private T body;
 }

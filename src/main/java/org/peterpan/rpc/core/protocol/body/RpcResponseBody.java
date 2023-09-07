@@ -18,6 +18,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 // 返回值编码
 public class RpcResponseBody implements Serializable {
-   private Object retObject;
+   private Object data;
+   private String message;
 }
 

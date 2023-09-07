@@ -1,15 +1,15 @@
 package org.peterpan.rpc.core.client;
 
+import io.netty.channel.DefaultEventLoop;
+import io.netty.util.concurrent.DefaultPromise;
 import lombok.extern.slf4j.Slf4j;
-import org.peterpan.rpc.common.MsgType;
-import org.peterpan.rpc.common.ProtocolConstants;
-import org.peterpan.rpc.common.ServiceMeta;
-import org.peterpan.rpc.common.StatusConstants;
+import org.peterpan.rpc.common.*;
 import org.peterpan.rpc.config.FilterConfig;
 import org.peterpan.rpc.config.RpcConfig;
 import org.peterpan.rpc.core.codec.RpcDecoder;
 import org.peterpan.rpc.core.codec.RpcEncoder;
 import org.peterpan.rpc.core.codec.serialization.SerializationFactory;
+import org.peterpan.rpc.core.codec.serialization.SerializationTypeEnum;
 import org.peterpan.rpc.core.protocol.RpcProtocol;
 import org.peterpan.rpc.core.protocol.body.RpcRequestBody;
 import org.peterpan.rpc.core.protocol.body.RpcResponseBody;
@@ -25,6 +25,7 @@ import org.peterpan.rpc.router.tolerant.FaultTolerantType;
 import org.peterpan.rpc.router.tolerant.IFaultTolerantHandler;
 import org.peterpan.rpc.util.RequestIdGenerator;
 import org.peterpan.rpc.util.redisKey.RpcServiceNameBuilder;
+import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -72,134 +73,159 @@ public class RpcClientProxy implements InvocationHandler {
         );
     }
 
+//        // 3、发送RpcRequest，获得RpcResponse【transfer层】
+//        // 与注册中心交互
+//        String serviceKey = RpcServiceNameBuilder.buildServiceKey(rpcRequestBody.getInterfaceName(), rpcRequestBody.getServiceVersion());
+//        Object[] params = rpcRequestBody.getParameters();
+//        // 计算哈希
+//        int invokerHashCode = params.length > 0 ? params[0].hashCode() : serviceKey.hashCode();
+//        // 根据服务key以及哈希获取服务提供方节点
+//        ServiceMeta curServiceMeta = registryCenter.
+//                discovery(serviceKey, invokerHashCode, loadBalancerType);
+//        // 供故障转移使用
+//        List<ServiceMeta> serviceMetas = registryCenter.discoveries(serviceKey);
+//        IFaultTolerantHandler faultTolerantHandler = FaultTolerantFactory.get(faultTolerantType);
+//        int count = 1;
+//        int retryCount = this.retryCount;
+//        RpcClientTransfer rpcClient = new RpcClientTransfer();
+//        ExecutorService executorService = Executors.newSingleThreadExecutor();
+//        while (count < retryCount) {
+//            ServiceMeta finalCurServiceMeta = curServiceMeta;
+//            Future<RpcProtocol> future = executorService.submit(() -> rpcClient.sendRequest(rpcRequest, finalCurServiceMeta));
+//            try {
+//                RpcProtocol rpcResponse = future.get(timeout, TimeUnit.MILLISECONDS);
+//
+//                // 4、解析RpcResponse，也就是在解析rpc协议【protocol层】
+//                MsgHeader respHeader = rpcResponse.getHeader(); // 来自于响应的header
+//                byte[] body = rpcResponse.getBody();
+//                if (respHeader.getMagic() == ProtocolConstants.MAGIC) {
+//                    // 将RpcResponse的body中的返回编码，解码成我们需要的对象Object并返回【codec层】
+//                    RpcResponseBody rpcResponseBody = (RpcResponseBody) RpcDecoder.decode(body, respHeader.getSerialization(), respHeader.getMsgType());
+//                    Object retObject = rpcResponseBody.getRetObject();
+//                    log.info("requestID={}, rpc 调用成功, serviceKey={}, interface={}", respHeader.getRequestId(), serviceKey, rpcRequestBody.getMethodName());
+//                    try {
+//                        FilterConfig.getClientAfterFilterChain().doFilter(filterData);
+//                    }catch (Throwable e){
+//                        throw e;
+//                    }
+//                    return retObject;
+//                }
+//            } catch (TimeoutException e) {
+//                // 超时处理逻辑
+//                future.cancel(true); // 尝试取消任务
+//                String errorMsg = "RPC调用超时"; // 自定义错误信息
+//                FaultTolerantContext ftCtx = faultTolerantHandler.tolerant(
+//                        FaultTolerantContext.builder()
+//                                .serviceKey(serviceKey)
+//                                .methodName(rpcRequestBody.getMethodName())
+//                                .errorMsg(errorMsg)
+//                                .serviceMeta(curServiceMeta)
+//                                .serviceMetas(serviceMetas)
+//                                .count(count)
+//                                .retryCount(retryCount)
+//                                .requestId(reqHeader.getRequestId())
+//                                .build()
+//                        );
+//                if (ftCtx == null) {
+//                    return null;
+//                }
+//                count = ftCtx.getCount();
+//            } catch (ExecutionException e) {
+//                // 处理Future内部的异常
+//                String errorMsg = "RPC调用失败:" + e.getCause().getMessage(); // 自定义错误信息
+//                FaultTolerantContext ftCtx = faultTolerantHandler.tolerant(
+//                        FaultTolerantContext.builder()
+//                                .serviceKey(serviceKey)
+//                                .methodName(rpcRequestBody.getMethodName())
+//                                .errorMsg(errorMsg)
+//                                .serviceMeta(curServiceMeta)
+//                                .serviceMetas(serviceMetas)
+//                                .count(count)
+//                                .retryCount(retryCount)
+//                                .requestId(reqHeader.getRequestId())
+//                                .build()
+//                );
+//                if (ftCtx == null) {
+//                    return null;
+//                }
+//                count = ftCtx.getCount();
+//            }
+//
+//        }
+//        throw new RuntimeException("requestID=" + reqHeader.getRequestId() + ", RPC调用失败，超过最大重试次数=" + retryCount + ", serviceKey=" + serviceKey + ", interface=" + rpcRequestBody.getMethodName());
+//    }
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-
-        // 1、将调用所需信息编码成bytes[]，即有了调用编码【codec层】
-        long startTime = System.nanoTime();
-
-        byte serializationType = rpcConfig.getSerializationByte();
-        byte msgType = (byte) MsgType.REQUEST.ordinal();
-
+        RpcProtocol<RpcRequestBody> protocol = new RpcProtocol<>();
         // 构建消息头
-        MsgHeader reqHeader = new MsgHeader();
-        reqHeader.setMagic(ProtocolConstants.MAGIC);
-        reqHeader.setVersion(ProtocolConstants.VERSION);
-        reqHeader.setSerialization(serializationType); // 配置文件读取方
-        reqHeader.setMsgType(msgType); // 注意这里是请求REQUEST
-        reqHeader.setStatus((byte) StatusConstants.NORMAL);
-        reqHeader.setRequestId(RequestIdGenerator.generateRequestId());
+        MsgHeader header = new MsgHeader();
+        long requestId = RpcRequestHolder.REQUEST_ID_GEN.incrementAndGet();
+        header.setMagic(ProtocolConstants.MAGIC);
+        header.setVersion(ProtocolConstants.VERSION);
+        header.setRequestId(requestId);
+        header.setSerialization((byte) SerializationTypeEnum.HESSIAN.getType());
+        header.setMsgType((byte) MsgType.REQUEST.ordinal());
+        header.setStatus((byte) 0x1);
+        protocol.setHeader(header);
 
-        // 构建消息体
-        RpcRequestBody rpcRequestBody = RpcRequestBody.builder()
-                .serviceVersion(serviceVersion)
-                .interfaceName(method.getDeclaringClass().getName())
-                .methodName(method.getName())
-                .paramTypes(method.getParameterTypes())
-                .parameters(args)
-                .build();
+        // 构建请求体
+        RpcRequestBody request = new RpcRequestBody();
+        request.setServiceVersion(this.serviceVersion);
+        request.setInterfaceName(method.getDeclaringClass().getName());
+        request.setMethodName(method.getName());
+        request.setParamsTypes(method.getParameterTypes());
+        request.setParams(ObjectUtils.isEmpty(args) ? new Object[0] : args);
+        protocol.setBody(request);
 
-        // 序列化
-        byte[] bytes = RpcEncoder.encode(rpcRequestBody, serializationType);
+        RpcClientTransfer rpcConsumer = new RpcClientTransfer();
+        // 处理返回数据
+        RpcFuture<RpcResponseBody> future = new RpcFuture<>(new DefaultPromise<>(new DefaultEventLoop()), timeout);
 
-        // 拦截器的上下文
-        final FilterData filterData = new FilterData(rpcRequestBody);
-        try {
-            FilterConfig.getClientBeforeFilterChain().doFilter(filterData);
-        }catch (Throwable e){
-            throw e;
-        }
+        RpcRequestHolder.REQUEST_MAP.put(requestId, future);
 
-        long endTime = System.nanoTime();
-        long executionTime = (endTime - startTime) / 1_000_000; // 计算执行时间(毫秒为单位)
-        int byteSize = bytes.length;
-//        log.info("requestID={}, [执行{}序列化方式] - [{}_{}${}] - 序列化执行时间={}ms, 数据大小={}byte", reqHeader.getRequestId(), SerializationTypeEnum.findByType(serializationType), method.getDeclaringClass().getName(), serviceVersion, method.getName(), executionTime, byteSize);
-
-        // 2、创建RPC协议，将Header、Body的内容设置好（Body中存放调用编码）【protocol层】
-        RpcProtocol rpcRequest = new RpcProtocol();
-        rpcRequest.setHeader(reqHeader);
-        rpcRequest.setBody(bytes);
-
-        // 3、发送RpcRequest，获得RpcResponse【transfer层】
-        // 与注册中心交互
-        String serviceKey = RpcServiceNameBuilder.buildServiceKey(rpcRequestBody.getInterfaceName(), rpcRequestBody.getServiceVersion());
-        Object[] params = rpcRequestBody.getParameters();
+        String serviceKey = RpcServiceNameBuilder.buildServiceKey(request.getInterfaceName(), request.getServiceVersion());
+        Object[] params = request.getParams();
         // 计算哈希
         int invokerHashCode = params.length > 0 ? params[0].hashCode() : serviceKey.hashCode();
         // 根据服务key以及哈希获取服务提供方节点
         ServiceMeta curServiceMeta = registryCenter.
                 discovery(serviceKey, invokerHashCode, loadBalancerType);
         // 供故障转移使用
-        List<ServiceMeta> serviceMetas = registryCenter.discoveries(serviceKey);
-        IFaultTolerantHandler faultTolerantHandler = FaultTolerantFactory.get(faultTolerantType);
-        int count = 1;
-        int retryCount = this.retryCount;
-        RpcClientTransfer rpcClient = new RpcClientTransfer();
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        while (count < retryCount) {
-            ServiceMeta finalCurServiceMeta = curServiceMeta;
-            Future<RpcProtocol> future = executorService.submit(() -> rpcClient.sendRequest(rpcRequest, finalCurServiceMeta));
+        List<ServiceMeta> serviceMetas = this.registryCenter.discoveries(serviceKey);
+        long count = 1;
+        long retryCount = this.retryCount;
+        while (count <= retryCount) {
             try {
-                RpcProtocol rpcResponse = future.get(timeout, TimeUnit.MILLISECONDS);
-
-                // 4、解析RpcResponse，也就是在解析rpc协议【protocol层】
-                MsgHeader respHeader = rpcResponse.getHeader(); // 来自于响应的header
-                byte[] body = rpcResponse.getBody();
-                if (respHeader.getMagic() == ProtocolConstants.MAGIC) {
-                    // 将RpcResponse的body中的返回编码，解码成我们需要的对象Object并返回【codec层】
-                    RpcResponseBody rpcResponseBody = (RpcResponseBody) RpcDecoder.decode(body, respHeader.getSerialization(), respHeader.getMsgType());
-                    Object retObject = rpcResponseBody.getRetObject();
-                    log.info("requestID={}, rpc 调用成功, serviceKey={}, interface={}", respHeader.getRequestId(), serviceKey, rpcRequestBody.getMethodName());
-                    try {
-                        FilterConfig.getClientAfterFilterChain().doFilter(filterData);
-                    }catch (Throwable e){
-                        throw e;
-                    }
-                    return retObject;
+                rpcConsumer.sendRequest(protocol, curServiceMeta);
+                RpcResponseBody rpcResponse = future.getPromise().get(future.getTimeout(), TimeUnit.MILLISECONDS);
+//                log.info("rpc 调用成功, serviceKey: {}", serviceKey);
+                return rpcResponse.getData();
+            } catch (Exception e) {
+                switch (faultTolerantType) {
+                    // 快速失败
+                    case FailFast:
+                        log.warn("rpc 调用失败,触发 FailFast 策略");
+                        break;
+                    // 故障转移
+                    case Failover:
+                        log.warn("rpc 调用失败,第{}次重试", count);
+                        count++;
+                        serviceMetas.remove(curServiceMeta); // 直接先删除当前节点
+                        if (!ObjectUtils.isEmpty(serviceMetas)) {
+                            curServiceMeta = serviceMetas.get(0);
+                        } else {
+                            log.warn("rpc 调用失败,无服务可用 serviceKey: {}", serviceKey);
+                            count = retryCount;
+                        }
+                        break;
+                    // 忽视这次错误
+                    case Failsafe:
+                        return null;
                 }
-            } catch (TimeoutException e) {
-                // 超时处理逻辑
-                future.cancel(true); // 尝试取消任务
-                String errorMsg = "RPC调用超时"; // 自定义错误信息
-                FaultTolerantContext ftCtx = faultTolerantHandler.tolerant(
-                        FaultTolerantContext.builder()
-                                .serviceKey(serviceKey)
-                                .methodName(rpcRequestBody.getMethodName())
-                                .errorMsg(errorMsg)
-                                .serviceMeta(curServiceMeta)
-                                .serviceMetas(serviceMetas)
-                                .count(count)
-                                .retryCount(retryCount)
-                                .requestId(reqHeader.getRequestId())
-                                .build()
-                        );
-                if (ftCtx == null) {
-                    return null;
-                }
-                count = ftCtx.getCount();
-            } catch (ExecutionException e) {
-                // 处理Future内部的异常
-                String errorMsg = "RPC调用失败:" + e.getCause().getMessage(); // 自定义错误信息
-                FaultTolerantContext ftCtx = faultTolerantHandler.tolerant(
-                        FaultTolerantContext.builder()
-                                .serviceKey(serviceKey)
-                                .methodName(rpcRequestBody.getMethodName())
-                                .errorMsg(errorMsg)
-                                .serviceMeta(curServiceMeta)
-                                .serviceMetas(serviceMetas)
-                                .count(count)
-                                .retryCount(retryCount)
-                                .requestId(reqHeader.getRequestId())
-                                .build()
-                );
-                if (ftCtx == null) {
-                    return null;
-                }
-                count = ftCtx.getCount();
             }
-
         }
-        throw new RuntimeException("requestID=" + reqHeader.getRequestId() + ", RPC调用失败，超过最大重试次数=" + retryCount + ", serviceKey=" + serviceKey + ", interface=" + rpcRequestBody.getMethodName());
+
+        throw new RuntimeException("RPC调用失败，超过最大重试次数：" + retryCount);
     }
 }
 

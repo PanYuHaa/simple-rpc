@@ -22,8 +22,8 @@ public class RpcRequestBody implements Serializable {
    private String serviceVersion;
    private String interfaceName;
    private String methodName;
-   private Object[] parameters;
-   private Class<?>[] paramTypes;
+   private Object[] params;
+   private Class<?>[] paramsTypes;
    private Map<String,Object> serviceAttachments;
    private Map<String,Object> clientAttachments;
 }

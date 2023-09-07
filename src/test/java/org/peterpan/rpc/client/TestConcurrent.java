@@ -18,12 +18,13 @@ import java.util.concurrent.Executors;
  */
 @Slf4j
 public class TestConcurrent {
-   private static final int TOTAL_REQUESTS = 10;
+   private static final int TOTAL_REQUESTS = 750;
    private static int successCount = 0;
 
    public static void main(String[] args) throws InterruptedException {
-      ExecutorService executorService = Executors.newFixedThreadPool(10);
+      ExecutorService executorService = Executors.newFixedThreadPool(100);
 
+      long startTime = System.nanoTime();
       // 模拟发送10个请求
       for (int i = 0; i < TOTAL_REQUESTS; i++) {
          executorService.execute(() -> {
@@ -34,17 +35,18 @@ public class TestConcurrent {
                        "v1",
                        "RoundRobin",
                        "FailFast",
-                       10000);
+                       1000);
                // 构造出请求对象HelloRequest
                HelloRequest helloRequest = new HelloRequest("peter");
                // rpc调用并返回结果对象HelloResponse
                HelloResponse helloResponse = helloService.hello(helloRequest);
-               // 从HelloResponse中获取msg
-               String helloMsg = helloResponse.getMsg();
-               // 打印msg
-               System.out.println(helloMsg);
-               if (helloMsg != null ) successCount++;
-               log.info("resp={}", helloMsg);
+//               // 从HelloResponse中获取msg
+//               String helloMsg = helloResponse.getMsg();
+//               // 打印msg
+//               System.out.println(helloMsg);
+//               if (helloMsg != null ) successCount++;
+//               log.info("resp={}", helloMsg);
+               if (helloResponse != null) successCount++;
             } catch (Exception e) {
                e.printStackTrace();
             } finally {
@@ -54,6 +56,10 @@ public class TestConcurrent {
             }
          });
       }
+
+      long endTime = System.nanoTime();
+      long executionTime = (endTime - startTime) / 1_000_000; // 计算执行时间(毫秒为单位)
+      log.info("executionTime={}ms", executionTime);
 
       // 关闭线程池
       executorService.shutdown();
