@@ -74,8 +74,18 @@ public class RedisRegistry implements IRegistryService {
 
         // 创建 JedisPoolConfig 对象，并配置最大连接数和最大空闲连接数
         JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMaxTotal(10); // 设置最大连接数为 10
-        poolConfig.setMaxIdle(5); // 设置最大空闲连接数为 5
+//        poolConfig.setMaxTotal(10); // 设置最大连接数为 10
+//        poolConfig.setMaxIdle(5); // 设置最大空闲连接数为 5
+        // 设置连接池中最大的连接数（包括空闲连接和活动连接）
+        poolConfig.setMaxTotal(10);
+        // 设置连接池中的最大空闲连接数，当连接池中的连接数超过这个数值时，多余的连接将被关闭并移除
+        poolConfig.setMaxIdle(5);
+        // 设置连接池中的最小空闲连接数，当连接池中的连接数低于这个数值时，连接池会创建新的连接
+        poolConfig.setMinIdle(1);
+        // 设置等待可用连接的最长时间（以毫秒为单位）。当连接池中的连接都在使用并且连接池达到最大连接数时，新的连接请求将等待一段时间，直到有连接被释放或等待时间超过了这个值
+        poolConfig.setMaxWaitMillis(3000);
+        // 设置在从连接池中获取连接时是否进行连接的健康检查。如果设置为 true，会在获取连接之前对连接进行测试，以确保连接仍然有效
+        poolConfig.setTestOnBorrow(true);
 
         // 创建 JedisPool 对象，用于连接 Redis 服务
         jedisPool = new JedisPool(poolConfig, split[0], Integer.valueOf(split[1])); // 使用拆分后的 host 和 port 创建 JedisPool
@@ -90,8 +100,8 @@ public class RedisRegistry implements IRegistryService {
 
     private Jedis getJedis() {
         Jedis jedis = jedisPool.getResource();
-        RpcConfig properties = RpcConfig.getInstance();
-        jedis.auth(properties.getRegisterPsw());
+//        RpcConfig properties = RpcConfig.getInstance();
+//        jedis.auth(properties.getRegisterPsw());
         return jedis;
     }
 
@@ -242,7 +252,6 @@ public class RedisRegistry implements IRegistryService {
 
     @Override
     public ServiceMeta discovery(String serviceName, int invokerHashCode, String loadBalancerType) throws Exception {
-//        IServiceLoadBalancer<ServiceMeta> loadBalancer = LoadBalancerFactory.getInstance(loadBalancerType);
         IServiceLoadBalancer<ServiceMeta> loadBalancer = LoadBalancerFactory.get(loadBalancerType);
         List<ServiceMeta> serviceMetas = listServices(serviceName);
         return loadBalancer.select(serviceMetas, invokerHashCode);

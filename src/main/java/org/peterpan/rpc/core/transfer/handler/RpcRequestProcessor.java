@@ -1,4 +1,4 @@
-package org.peterpan.rpc.core.transfer;
+package org.peterpan.rpc.core.transfer.handler;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -23,9 +23,9 @@ public class RpcRequestProcessor {
                 if (threadPoolExecutor == null) {
                     //核心线程数为 10，最大线程数为 10，线程空闲时间为 60 秒，使用 ArrayBlockingQueue 作为阻塞队列，队列大小为 10000
                     threadPoolExecutor = new ThreadPoolExecutor(
-                            10,
-                            10,
-                            60L,
+                            8,
+                            16,
+                            30L,
                             TimeUnit.SECONDS,
                             new ArrayBlockingQueue<>(10000));
                 }

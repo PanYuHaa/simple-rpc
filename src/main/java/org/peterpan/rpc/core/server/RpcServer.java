@@ -1,33 +1,20 @@
 package org.peterpan.rpc.core.server;
 
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.peterpan.rpc.common.ServiceMeta;
 import org.peterpan.rpc.config.RpcConfig;
-import org.peterpan.rpc.core.codec.RpcDecoder;
-import org.peterpan.rpc.core.codec.RpcEncoder;
 import org.peterpan.rpc.core.codec.serialization.SerializationFactory;
-import org.peterpan.rpc.core.transfer.RpcRequestHandler;
 import org.peterpan.rpc.core.transfer.RpcServerTransfer;
 import org.peterpan.rpc.registry.IRegistryService;
 import org.peterpan.rpc.registry.RegistryFactory;
 import org.peterpan.rpc.util.redisKey.RpcServiceNameBuilder;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.*;
 
 /**
  * @author PeterPan
@@ -53,6 +40,7 @@ public class RpcServer {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+//        serverAddress = "81.70.189.103";
     }
 
     public RpcServer() throws Exception {

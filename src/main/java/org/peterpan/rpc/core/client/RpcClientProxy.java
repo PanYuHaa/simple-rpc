@@ -205,6 +205,7 @@ public class RpcClientProxy implements InvocationHandler {
                     // 快速失败
                     case FailFast:
                         log.warn("rpc 调用失败,触发 FailFast 策略");
+                        count = retryCount;
                         break;
                     // 故障转移
                     case Failover:

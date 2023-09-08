@@ -1,4 +1,4 @@
-package org.peterpan.rpc.core.transfer;
+package org.peterpan.rpc.core.transfer.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.peterpan.rpc.config.RpcConfig;
 import org.peterpan.rpc.core.codec.RpcDecoder;
 import org.peterpan.rpc.core.codec.RpcEncoder;
+import org.peterpan.rpc.core.transfer.handler.RpcRequestHandler;
 
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -64,6 +65,7 @@ public class RpcServerTransfer {
                     .childOption(ChannelOption.SO_KEEPALIVE, true); //  TCP 连接的 KeepAlive 选项为 true
 
             ChannelFuture channelFuture = bootstrap.bind(this.serverAddress, serverPort).sync(); // 绑定服务器地址和端口，并启动服务器
+//            ChannelFuture channelFuture = bootstrap.bind("0.0.0.0", serverPort).sync(); // 绑定服务器地址和端口，并启动服务器
             log.info("server addr {} started on port {}", this.serverAddress, serverPort);
             channelFuture.channel().closeFuture().sync(); // 等待服务器关闭
         } finally {
