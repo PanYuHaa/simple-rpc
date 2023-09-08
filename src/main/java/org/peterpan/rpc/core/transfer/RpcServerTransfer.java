@@ -46,8 +46,8 @@ public class RpcServerTransfer {
      */
     public void startRpcServer() throws InterruptedException, UnknownHostException {
         int serverPort = Integer.parseInt(rpcConfig.getPort()); // 获取服务器端口号
-        EventLoopGroup boss = new NioEventLoopGroup(2); // 创建 Boss 线程组
-        EventLoopGroup worker = new NioEventLoopGroup(4); // 创建 Worker 线程组
+        EventLoopGroup boss = new NioEventLoopGroup(); // 创建 Boss 线程组
+        EventLoopGroup worker = new NioEventLoopGroup(); // 创建 Worker 线程组
         try {
             ServerBootstrap bootstrap = new ServerBootstrap(); // 创建服务器启动引导类 ServerBootstrap，用于配置和启动服务器
             bootstrap.group(boss, worker)
