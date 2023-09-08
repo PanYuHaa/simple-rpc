@@ -20,4 +20,9 @@ public class HelloServiceImpl implements HelloService {
         HelloResponse response = new HelloResponse(retMsg);
         return response;
     }
+
+    @Override
+    public HelloResponse QPSTest() {
+        return new HelloResponse("success request!");
+    }
 }

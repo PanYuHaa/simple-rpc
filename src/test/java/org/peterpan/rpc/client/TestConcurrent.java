@@ -21,7 +21,7 @@ import static java.lang.Thread.sleep;
  */
 @Slf4j
 public class TestConcurrent {
-    private static final int TOTAL_REQUESTS = 750;
+    private static final int TOTAL_REQUESTS = 800;
     private static AtomicInteger successCount = new AtomicInteger(0);
     private static AtomicInteger totalRequestsCount = new AtomicInteger(0);
 
@@ -40,10 +40,11 @@ public class TestConcurrent {
                             "RoundRobin",
                             "FailFast",
                             1000);
-                    // 构造出请求对象HelloRequest
-                    HelloRequest helloRequest = new HelloRequest("peter");
-                    // rpc调用并返回结果对象HelloResponse
-                    HelloResponse helloResponse = helloService.hello(helloRequest);
+                    HelloResponse QPSRet = helloService.QPSTest();
+//                    // 构造出请求对象HelloRequest
+//                    HelloRequest helloRequest = new HelloRequest("peter");
+//                    // rpc调用并返回结果对象HelloResponse
+//                    HelloResponse helloResponse = helloService.hello(helloRequest);
 //               // 从HelloResponse中获取msg
 //               String helloMsg = helloResponse.getMsg();
 //               // 打印msg

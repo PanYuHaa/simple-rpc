@@ -13,19 +13,21 @@ public class TestClient {
                 "RoundRobin",
                 "FailFast",
                 1000);
-        // 构造出请求对象HelloRequest
-        HelloRequest helloRequest = new HelloRequest("peter");
-        // rpc调用并返回结果对象HelloResponse(因为他是代理类，所以调用的同时他会激活invoke中的逻辑)
-        HelloResponse helloResponse = helloService.hello(helloRequest);
-        // 从HelloResponse中获取msg
-        String helloMsg = helloResponse.getMsg();
-        // 打印msg
-        System.out.println(helloMsg);
+        HelloResponse QPSRet = helloService.QPSTest();
+//        // 构造出请求对象HelloRequest
+//        HelloRequest helloRequest = new HelloRequest("peter");
+//        // rpc调用并返回结果对象HelloResponse(因为他是代理类，所以调用的同时他会激活invoke中的逻辑)
+//        HelloResponse helloResponse = helloService.hello(helloRequest);
 
-        // 调用hi方法
-        HelloResponse hiResponse = helloService.hi(helloRequest);
-        String hiMsg = hiResponse.getMsg();
-        System.out.println(hiMsg);
+//        // 从HelloResponse中获取msg
+//        String helloMsg = helloResponse.getMsg();
+//        // 打印msg
+//        System.out.println(helloMsg);
+
+//        // 调用hi方法
+//        HelloResponse hiResponse = helloService.hi(helloRequest);
+//        String hiMsg = hiResponse.getMsg();
+//        System.out.println(hiMsg);
 
         // 调用ping方法
 //        PingService pingService = proxy.getService(PingService.class);
