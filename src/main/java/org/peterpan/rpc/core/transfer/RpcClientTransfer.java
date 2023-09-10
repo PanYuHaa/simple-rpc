@@ -69,3 +69,58 @@ public class RpcClientTransfer {
 
 
 }
+
+//public class RpcClientTransfer {
+//    private final Bootstrap bootstrap;
+//    private final EventLoopGroup eventLoopGroup;
+//    private final ConcurrentHashMap<String, Channel> channelPool = new ConcurrentHashMap<>();
+//
+//    public RpcClientTransfer() {
+//        bootstrap = new Bootstrap();
+//        eventLoopGroup = new NioEventLoopGroup(4);
+//        bootstrap.group(eventLoopGroup)
+//            .channel(NioSocketChannel.class)
+//            .handler(new ChannelInitializer<SocketChannel>() {
+//                @Override
+//                protected void initChannel(SocketChannel socketChannel) throws Exception {
+//                    socketChannel.pipeline()
+//                        .addLast(new RpcEncoder())
+//                        .addLast(new RpcDecoder())
+//                        .addLast(new RpcResponseHandler());
+//                }
+//            });
+//    }
+//
+//    /**
+//     * 发送请求
+//     *
+//     * @param protocol          消息
+//     * @param serviceMetadata   服务
+//     * @throws Exception
+//     */
+//    public void sendRequest(RpcProtocol<RpcRequestBody> protocol, ServiceMeta serviceMetadata) throws Exception {
+//        if (serviceMetadata != null) {
+//            String key = serviceMetadata.getServiceAddr() + ":" + serviceMetadata.getServicePort();
+//            Channel channel = channelPool.get(key);
+//
+//            // 如果连接不存在或者已经关闭，则重新创建连接
+//            if (channel == null || !channel.isActive()) {
+//                // 连接
+//                ChannelFuture future = bootstrap.connect(serviceMetadata.getServiceAddr(), serviceMetadata.getServicePort()).sync();
+//                if (future.isSuccess()) {
+//                    log.info("连接 rpc server {} 端口 {} 成功.", serviceMetadata.getServiceAddr(), serviceMetadata.getServicePort());
+//                    channel = future.channel();
+//                    channelPool.put(key, channel);
+//                } else {
+//                    log.error("连接 rpc server {} 端口 {} 失败.", serviceMetadata.getServiceAddr(), serviceMetadata.getServicePort());
+//                    future.cause().printStackTrace();
+//                    eventLoopGroup.shutdownGracefully();
+//                    return;
+//                }
+//            }
+//
+//            // 写入数据
+//            channel.writeAndFlush(protocol);
+//        }
+//    }
+//}
