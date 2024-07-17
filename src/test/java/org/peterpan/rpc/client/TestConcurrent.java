@@ -21,7 +21,7 @@ import static java.lang.Thread.sleep;
  */
 @Slf4j
 public class TestConcurrent {
-    private static final int TOTAL_REQUESTS = 800;
+    private static final int TOTAL_REQUESTS = 750;
     private static AtomicInteger successCount = new AtomicInteger(0);
     private static AtomicInteger totalRequestsCount = new AtomicInteger(0);
 

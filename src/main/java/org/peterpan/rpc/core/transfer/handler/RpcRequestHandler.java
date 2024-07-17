@@ -37,7 +37,8 @@ import java.util.Map;
  * 处理 RPC 请求的处理器。
  */
 public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<RpcRequestBody>> {
-   private final Map<String, Object> rpcServiceMap; // RPC 服务对象的映射表
+
+    private final Map<String, Object> rpcServiceMap; // RPC 服务对象的映射表
 
    /**
     * 构造函数
@@ -47,22 +48,57 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
       this.rpcServiceMap = rpcServiceMap;
    }
 
-   /**
-    * 处理接收到的 RPC 请求消息
-    */
-   @Override
-   protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcRequestBody> protocol) throws Exception {
-      // 异步处理
-      RpcRequestProcessor.submitRequest(() -> {
-         // 创建响应协议对象
-         RpcProtocol<RpcResponseBody> resProtocol = new RpcProtocol<>();
-         // 创建响应对象
-         RpcResponseBody response = new RpcResponseBody();
-         // 获取请求协议的消息头
-         MsgHeader header = protocol.getHeader();
-         // 设置消息类型为响应类型（ordinal方法用来获取枚举在其内部的位置）
-         header.setMsgType((byte) MsgType.RESPONSE.ordinal());
-         try {
+//   /**
+//    * 处理接收到的 RPC 请求消息（异步）
+//    */
+//   @Override
+//   protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcRequestBody> protocol) throws Exception {
+//      // 异步处理
+//      RpcRequestProcessor.submitRequest(() -> {
+//         // 创建响应协议对象
+//         RpcProtocol<RpcResponseBody> resProtocol = new RpcProtocol<>();
+//         // 创建响应对象
+//         RpcResponseBody response = new RpcResponseBody();
+//         // 获取请求协议的消息头
+//         MsgHeader header = protocol.getHeader();
+//         // 设置消息类型为响应类型（ordinal方法用来获取枚举在其内部的位置）
+//         header.setMsgType((byte) MsgType.RESPONSE.ordinal());
+//         try {
+//            // 处理请求并获取结果
+//            Object result = handle(protocol.getBody());
+//            // 设置响应数据
+//            response.setData(result);
+//            // 设置响应状态为成功
+//            header.setStatus((byte) MsgStatus.SUCCESS.ordinal());
+//            // 设置响应协议的消息头
+//            resProtocol.setHeader(header);
+//            // 设置响应协议的消息体
+//            resProtocol.setBody(response);
+//         } catch (Throwable throwable) {
+//            // 处理请求出错，设置响应状态为失败，并设置错误消息
+//            header.setStatus((byte) MsgStatus.FAILED.ordinal());
+//            response.setMessage(throwable.toString());
+//            log.error("process request {} error", header.getRequestId(), throwable);
+//         }
+//         // 发送响应协议给客户端
+//         ctx.writeAndFlush(resProtocol); // 用于将数据写入到 Channel，并刷新到底层的网络连接中，用于实现高性能的异步数据传输
+//      });
+//   }
+
+    /**
+     * 处理接收到的 RPC 请求消息（同步）
+     */
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, RpcProtocol<RpcRequestBody> protocol) throws Exception {
+        // 创建响应协议对象
+        RpcProtocol<RpcResponseBody> resProtocol = new RpcProtocol<>();
+        // 创建响应对象
+        RpcResponseBody response = new RpcResponseBody();
+        // 获取请求协议的消息头
+        MsgHeader header = protocol.getHeader();
+        // 设置消息类型为响应类型（ordinal方法用来获取枚举在其内部的位置）
+        header.setMsgType((byte) MsgType.RESPONSE.ordinal());
+        try {
             // 处理请求并获取结果
             Object result = handle(protocol.getBody());
             // 设置响应数据
@@ -73,16 +109,15 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<RpcProtocol<R
             resProtocol.setHeader(header);
             // 设置响应协议的消息体
             resProtocol.setBody(response);
-         } catch (Throwable throwable) {
+        } catch (Throwable throwable) {
             // 处理请求出错，设置响应状态为失败，并设置错误消息
             header.setStatus((byte) MsgStatus.FAILED.ordinal());
             response.setMessage(throwable.toString());
             log.error("process request {} error", header.getRequestId(), throwable);
-         }
-         // 发送响应协议给客户端
-         ctx.writeAndFlush(resProtocol); // 用于将数据写入到 Channel，并刷新到底层的网络连接中，用于实现高性能的异步数据传输
-      });
-   }
+        }
+        // 发送响应协议给客户端
+        ctx.writeAndFlush(resProtocol); // 用于将数据写入到 Channel，并刷新到底层的网络连接中，用于实现高性能的异步数据传输
+    }
 
    /**
     * 处理具体的 RPC 请求
